@@ -6,6 +6,8 @@ import * as THREE from "three";
 import { PROJECTS } from "./data/projects";
 import { ProjectCard } from "./components/ui/ProjectCard";
 import SceneObjects from "./components/3d/SceneObjects";
+import { HUD } from "./components/ui/HUD";
+import { SystemDiagnostic } from "./components/ui/SystemDiagnostic";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { BlendFunction, ChromaticAberrationEffect } from "postprocessing";
 import { useExperience } from "./hooks/useExperience";
@@ -93,7 +95,8 @@ export default function PortfolioScene() {
         start: "top top",
         end: "bottom bottom",
         onUpdate: (self) => {
-          setTargetProgress(self.progress * (totalProjects - 1));
+          // Progress covers total panels including the Diagnostic Hero
+          setTargetProgress(self.progress * totalProjects);
           scrollVelocityRef.current = Math.abs(self.getVelocity() / 3000);
         },
       });
@@ -137,14 +140,15 @@ export default function PortfolioScene() {
       ref={containerRef}
       className="relative min-h-screen bg-[#090a0f] text-slate-50 font-sans selection:bg-cyan-500 selection:text-white"
     >
-      <div
-        className="pointer-events-none fixed inset-0 z-50 mix-blend-overlay opacity-10"
+      <div className="pointer-events-none fixed inset-0 z-50 mix-blend-overlay opacity-10"
         style={{
           background:
             "linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))",
           backgroundSize: "100% 2px, 3px 100%",
         }}
       />
+
+      <HUD />
 
       <div className="fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto">
         <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
@@ -153,11 +157,15 @@ export default function PortfolioScene() {
         </Canvas>
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 md:pt-0">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-10 pb-16">
+        <SystemDiagnostic ref={(el: HTMLDivElement | null) => {
+          panelsRef.current[0] = el;
+        }} />
+
         {PROJECTS.map((project, i) => (
           <div key={project.id} ref={(el) => {
-            panelsRef.current[i] = el;
-          }} className="flex min-h-screen items-start md:items-center">
+            panelsRef.current[i + 1] = el;
+          }} className="flex min-h-screen items-start md:items-center py-10 md:py-0">
             <ProjectCard project={project} index={i} total={PROJECTS.length} />
           </div>
         ))}
