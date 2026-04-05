@@ -1,0 +1,1917 @@
+Directory structure:
+└── adrielrancepascua-dev-hotel-system-demo/
+    ├── README.md
+    ├── AGENTS.md
+    ├── CLAUDE.md
+    ├── eslint.config.mjs
+    ├── next.config.ts
+    ├── package.json
+    ├── postcss.config.mjs
+    ├── tsconfig.json
+    ├── src/
+    │   ├── app/
+    │   │   ├── globals.css
+    │   │   ├── layout.tsx
+    │   │   ├── page.tsx
+    │   │   ├── dashboard/
+    │   │   │   └── page.tsx
+    │   │   ├── frontdesk/
+    │   │   │   └── page.tsx
+    │   │   ├── housekeeping/
+    │   │   │   └── page.tsx
+    │   │   ├── requests/
+    │   │   │   └── page.tsx
+    │   │   └── room/
+    │   │       └── [roomNumber]/
+    │   │           └── page.tsx
+    │   ├── components/
+    │   │   ├── AppHeader.tsx
+    │   │   ├── GuestConciergePanel.tsx
+    │   │   ├── OperationsPageLayout.tsx
+    │   │   ├── RequestFeedPanel.tsx
+    │   │   ├── RoomOperationsBoard.tsx
+    │   │   └── ThemeToggle.tsx
+    │   └── lib/
+    │       ├── constants.ts
+    │       ├── demo.ts
+    │       ├── types.ts
+    │       └── supabase/
+    │           └── client.ts
+    └── supabase/
+        └── schema.sql
+
+================================================
+FILE: README.md
+================================================
+# Harborlight Hotel Operations Demo
+
+Demo hotel management system built with Next.js App Router, TypeScript, TailwindCSS, and Supabase.
+
+## Features
+
+- Room status dashboard with color-coded cards
+- Front desk actions: check in, check out, mark reserved, report maintenance
+- Housekeeping actions: start cleaning, finish cleaning, report issue
+- Realtime room and request updates across pages via Supabase subscriptions
+- Guest QR concierge flow at `/room/[roomNumber]`
+- Staff request feed with mark-completed workflow
+- Summary stats for occupied, ready, cleaning, maintenance, and needs cleaning
+
+## Routes
+
+- `/dashboard` Manager overview with role switcher
+- `/frontdesk` Front desk action board
+- `/housekeeping` Housekeeping action board
+- `/room/[roomNumber]` Guest mobile concierge page
+- `/requests` Staff request feed
+
+## Database Setup (Supabase)
+
+1. Create a Supabase project.
+2. Open the SQL editor and run `supabase/schema.sql`.
+3. Copy `.env.example` to `.env.local` and fill in values:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+If env vars are missing, the app runs in local demo mode with generated room/request data.
+
+## Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Demo Data
+
+- Rooms: `101` to `120`
+- Realistic status mix: ready, occupied, cleaning, needs cleaning, maintenance
+- Sample guest requests included in SQL seed
+- Placeholder guest names shown for occupied rooms
+
+
+
+================================================
+FILE: AGENTS.md
+================================================
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+
+
+
+================================================
+FILE: CLAUDE.md
+================================================
+@AGENTS.md
+
+
+
+================================================
+FILE: eslint.config.mjs
+================================================
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+
+
+
+================================================
+FILE: next.config.ts
+================================================
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+
+
+================================================
+FILE: package.json
+================================================
+{
+  "name": "hotel-system-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "next": "16.2.2",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+
+
+
+================================================
+FILE: postcss.config.mjs
+================================================
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+
+
+
+================================================
+FILE: tsconfig.json
+================================================
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+
+
+
+================================================
+FILE: src/app/globals.css
+================================================
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+}
+
+html[data-theme="dark"] {
+  --background: #020617;
+  --foreground: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: radial-gradient(circle at top, #ffffff 0%, var(--background) 56%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+}
+
+html[data-theme="dark"] body {
+  background: radial-gradient(circle at top, #0f172a 0%, var(--background) 55%);
+}
+
+@layer base {
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.25);
+  }
+
+  html[data-theme="dark"] a:focus-visible,
+  html[data-theme="dark"] button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.4);
+  }
+}
+
+@layer components {
+  .staff-mode-card {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .staff-mode-action {
+    min-height: 48px;
+    width: 100%;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .staff-mode-action:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.25);
+  }
+
+  .staff-mode-action-primary {
+    background-color: #0f172a;
+    color: #f8fafc;
+  }
+
+  .staff-mode-action-secondary {
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+
+  html[data-theme="dark"] .staff-mode-action-secondary {
+    background-color: #1e293b;
+    color: #e2e8f0;
+  }
+
+  .staff-mode-badge {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.01em;
+  }
+}
+
+
+
+================================================
+FILE: src/app/layout.tsx
+================================================
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Harborlight Hotel Ops Demo",
+  description: "Realtime hotel operations demo with Next.js and Supabase",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        >
+          Skip to main content
+        </a>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+
+
+================================================
+FILE: src/app/page.tsx
+================================================
+import Link from "next/link";
+
+import { AppHeader } from "@/components/AppHeader";
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+      <AppHeader />
+      <main id="main-content" className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700 sm:p-8">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Demo Workflow
+          </p>
+          <h2 className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
+            Hotel Operations System
+          </h2>
+          <p className="mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
+            This demo shows front desk and housekeeping room status operations,
+            live updates across dashboards, guest QR concierge requests, and a
+            staff request completion feed.
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <Link
+              href="/dashboard"
+              className="block min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              Open Manager Dashboard
+            </Link>
+            <Link
+              href="/frontdesk"
+              className="block min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              Open Front Desk
+            </Link>
+            <Link
+              href="/housekeeping"
+              className="block min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              Open Housekeeping
+            </Link>
+            <Link
+              href="/requests"
+              className="block min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              Open Request Feed
+            </Link>
+            <Link
+              href="/room/108"
+              className="block min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              Guest QR Example
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: src/app/dashboard/page.tsx
+================================================
+import { OperationsPageLayout } from "@/components/OperationsPageLayout";
+import { RoomOperationsBoard } from "@/components/RoomOperationsBoard";
+
+export default function DashboardPage() {
+  return (
+    <OperationsPageLayout
+      title="Manager Room Status Dashboard"
+      subtitle="Monitor live room state and apply role-specific operations."
+      topSlot={
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <article className="rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-200">
+            <p className="font-semibold">Demo Guide for Managers</p>
+            <p title="Rooms 101-120 are seeded to show occupancy and cleaning movement.">
+              Rooms 101-120 are preloaded with mixed statuses for walkthroughs.
+            </p>
+          </article>
+          <article className="rounded-xl border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-700 dark:bg-sky-950/40 dark:text-sky-200">
+            <p className="font-semibold">Realtime Quick Tip</p>
+            <p title="Open /frontdesk, /housekeeping, and /requests in separate tabs and perform an action.">
+              Open multiple staff pages in different tabs to observe instant sync.
+            </p>
+          </article>
+        </div>
+      }
+    >
+      <RoomOperationsBoard mode="manager" />
+    </OperationsPageLayout>
+  );
+}
+
+
+
+================================================
+FILE: src/app/frontdesk/page.tsx
+================================================
+import { OperationsPageLayout } from "@/components/OperationsPageLayout";
+import { RoomOperationsBoard } from "@/components/RoomOperationsBoard";
+
+export default function FrontDeskPage() {
+  return (
+    <OperationsPageLayout
+      title="Front Desk Console"
+      subtitle="Check in and check out guests while tracking room availability."
+    >
+      <RoomOperationsBoard mode="frontdesk" />
+    </OperationsPageLayout>
+  );
+}
+
+
+
+================================================
+FILE: src/app/housekeeping/page.tsx
+================================================
+import { OperationsPageLayout } from "@/components/OperationsPageLayout";
+import { RoomOperationsBoard } from "@/components/RoomOperationsBoard";
+
+export default function HousekeepingPage() {
+  return (
+    <OperationsPageLayout
+      title="Housekeeping Console"
+      subtitle="Move rooms through cleaning and report issues in real time."
+    >
+      <RoomOperationsBoard mode="housekeeping" />
+    </OperationsPageLayout>
+  );
+}
+
+
+
+================================================
+FILE: src/app/requests/page.tsx
+================================================
+import { OperationsPageLayout } from "@/components/OperationsPageLayout";
+import { RequestFeedPanel } from "@/components/RequestFeedPanel";
+
+export default function RequestsPage() {
+  return (
+    <OperationsPageLayout
+      title="Staff Request Feed"
+      subtitle="Incoming guest requests update instantly. Mark tasks complete when done."
+      maxWidthClass="max-w-5xl"
+    >
+      <RequestFeedPanel />
+    </OperationsPageLayout>
+  );
+}
+
+
+
+================================================
+FILE: src/app/room/[roomNumber]/page.tsx
+================================================
+import { GuestConciergePanel } from "@/components/GuestConciergePanel";
+
+export default async function RoomConciergePage({
+  params,
+}: {
+  params: Promise<{ roomNumber: string }>;
+}) {
+  const { roomNumber } = await params;
+
+  return <GuestConciergePanel roomNumber={roomNumber} />;
+}
+
+
+
+================================================
+FILE: src/components/AppHeader.tsx
+================================================
+"use client";
+
+import { useEffect, useState } from "react";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { ThemeToggle } from "@/components/ThemeToggle";
+
+const links = [
+  { href: "/dashboard", label: "Manager" },
+  { href: "/frontdesk", label: "Front Desk" },
+  { href: "/housekeeping", label: "Housekeeping" },
+  { href: "/requests", label: "Requests Feed" },
+  { href: "/room/108", label: "Guest QR Demo" },
+];
+
+export function AppHeader() {
+  const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  const linkClass =
+    "inline-flex min-h-11 items-center rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:text-slate-200 dark:focus-visible:ring-slate-300";
+
+  return (
+    <header className="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-700 dark:bg-slate-900/90">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Harborlight Hotel Ops Demo
+          </p>
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100 sm:text-xl">
+            Small Hotel Operations Console
+          </h1>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-app-nav"
+          aria-label="Toggle navigation menu"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 md:hidden dark:border-slate-600 dark:text-slate-200 dark:focus-visible:ring-slate-300"
+        >
+          Menu
+        </button>
+
+        <nav aria-label="Primary" className="hidden items-center gap-2 text-sm md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={linkClass}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <ThemeToggle />
+        </nav>
+      </div>
+
+      <nav
+        id="mobile-app-nav"
+        aria-label="Mobile primary"
+        className={`${isMenuOpen ? "block" : "hidden"} border-t border-slate-200 px-4 py-3 md:hidden dark:border-slate-700`}
+      >
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="block min-h-11 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-300"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <ThemeToggle className="w-full justify-center rounded-xl" />
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+
+
+================================================
+FILE: src/components/GuestConciergePanel.tsx
+================================================
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { requestTypeLabels } from "@/lib/constants";
+import { buildDemoRooms } from "@/lib/demo";
+import {
+  getSupabaseBrowserClient,
+  hasSupabaseConfig,
+} from "@/lib/supabase/client";
+import type { RequestRecord, RequestType, RoomStatus } from "@/lib/types";
+
+const requestButtons: Array<{ type: RequestType; label: string }> = [
+  { type: "towels", label: "Request Towels" },
+  { type: "housekeeping", label: "Request Housekeeping" },
+  { type: "late_checkout", label: "Late Checkout Request" },
+  { type: "food", label: "Order Food" },
+  { type: "hotel_services", label: "View Hotel Services" },
+];
+
+const hotelServices = [
+  "Pool and spa access: 6:00 AM - 10:00 PM",
+  "Airport shuttle on request",
+  "Breakfast buffet: 7:00 AM - 10:30 AM",
+  "Laundry pickup before 9:00 PM",
+];
+
+export function GuestConciergePanel({ roomNumber }: { roomNumber: string }) {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
+  const [workingType, setWorkingType] = useState<RequestType | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
+  const [recentRequests, setRecentRequests] = useState<RequestRecord[]>([]);
+
+  const fetchGuestData = useCallback(async () => {
+    if (!supabase) {
+      const demoRoom = buildDemoRooms().find((room) => room.room_number === roomNumber);
+      setRoomStatus(demoRoom?.status ?? "ready");
+      return;
+    }
+
+    const [{ data: roomData }, { data: requestData }] = await Promise.all([
+      supabase
+        .from("rooms")
+        .select("status")
+        .eq("room_number", roomNumber)
+        .maybeSingle(),
+      supabase
+        .from("requests")
+        .select("id, room_number, request_type, status, created_at")
+        .eq("room_number", roomNumber)
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
+
+    setRoomStatus((roomData?.status as RoomStatus | undefined) ?? "ready");
+    setRecentRequests((requestData ?? []) as RequestRecord[]);
+  }, [roomNumber, supabase]);
+
+  useEffect(() => {
+    void fetchGuestData();
+  }, [fetchGuestData]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const roomChannel = supabase
+      .channel(`guest-room-${roomNumber}-${Date.now()}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "rooms",
+          filter: `room_number=eq.${roomNumber}`,
+        },
+        () => {
+          void fetchGuestData();
+        },
+      )
+      .subscribe();
+
+    const requestsChannel = supabase
+      .channel(`guest-requests-${roomNumber}-${Date.now()}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "requests",
+          filter: `room_number=eq.${roomNumber}`,
+        },
+        () => {
+          void fetchGuestData();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(roomChannel);
+      void supabase.removeChannel(requestsChannel);
+    };
+  }, [fetchGuestData, roomNumber, supabase]);
+
+  async function submitRequest(type: RequestType) {
+    setMessage(null);
+    setError(null);
+    setWorkingType(type);
+
+    // Use local state in demo mode, while Supabase mode relies on realtime data refresh.
+    if (!supabase) {
+      const localRequest: RequestRecord = {
+        id: Date.now(),
+        room_number: roomNumber,
+        request_type: type,
+        status: "pending",
+        created_at: new Date().toISOString(),
+      };
+
+      setRecentRequests((prev) => [localRequest, ...prev].slice(0, 5));
+      setMessage(`${requestTypeLabels[type]} has been sent to staff.`);
+      setWorkingType(null);
+      return;
+    }
+
+    const { error } = await supabase.from("requests").insert({
+      room_number: roomNumber,
+      request_type: type,
+      status: "pending",
+    });
+
+    if (error) {
+      setError(error.message);
+      setWorkingType(null);
+      return;
+    }
+
+    void fetchGuestData();
+    setMessage(`${requestTypeLabels[type]} has been sent to staff.`);
+    setWorkingType(null);
+  }
+
+  return (
+    <main
+      id="main-content"
+      className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-5 px-4 py-6 pb-36"
+    >
+      <header className="rounded-2xl bg-slate-900 px-4 py-5 text-white shadow-lg dark:bg-slate-800">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Room Concierge</p>
+        <h1 className="mt-2 text-2xl font-bold">Room {roomNumber}</h1>
+        <p className="mt-2 text-sm text-slate-200">
+          Tap a service and your request will be sent instantly.
+        </p>
+        <p className="mt-2 text-xs text-slate-300">
+          Live room status: {roomStatus ?? "loading..."}
+        </p>
+      </header>
+
+      {!hasSupabaseConfig && (
+        <p className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+          Demo mode active. Configure Supabase keys for live staff delivery.
+        </p>
+      )}
+
+      <section className="sticky bottom-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+        <h2 className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+          Quick Concierge Actions
+        </h2>
+        <div className="mt-2 space-y-2">
+        {requestButtons.map((button) => (
+          <button
+            key={button.type}
+            type="button"
+            disabled={workingType === button.type}
+            onClick={() => {
+              void submitRequest(button.type);
+            }}
+            className="staff-mode-action text-left border border-slate-300 bg-white text-slate-900 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          >
+            {button.label}
+          </button>
+        ))}
+        </div>
+      </section>
+
+      {message && (
+        <p className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200">
+          {message}
+        </p>
+      )}
+
+      {error && (
+        <p className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+          {error}
+        </p>
+      )}
+
+      <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-300">
+          Recent Requests
+        </h2>
+        {recentRequests.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+            No recent requests from this room.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+            {recentRequests.map((request) => (
+              <li
+                key={request.id}
+                className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
+              >
+                {requestTypeLabels[request.request_type]} - {request.status}
+              </li>
+            ))}
+          </ul>
+        )}
+      </article>
+
+      <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-300">
+          Hotel Services
+        </h2>
+        <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+          {hotelServices.map((service) => (
+            <li key={service} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800">
+              {service}
+            </li>
+          ))}
+        </ul>
+      </article>
+    </main>
+  );
+}
+
+
+
+================================================
+FILE: src/components/OperationsPageLayout.tsx
+================================================
+import type { ReactNode } from "react";
+
+import { AppHeader } from "@/components/AppHeader";
+
+interface OperationsPageLayoutProps {
+  title: string;
+  subtitle: string;
+  maxWidthClass?: string;
+  children: ReactNode;
+  topSlot?: ReactNode;
+}
+
+export function OperationsPageLayout({
+  title,
+  subtitle,
+  maxWidthClass = "max-w-6xl",
+  children,
+  topSlot,
+}: OperationsPageLayoutProps) {
+  return (
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+      <AppHeader />
+      <main id="main-content">
+        <section className={`mx-auto w-full px-4 pt-6 sm:px-6 ${maxWidthClass}`}>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{title}</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{subtitle}</p>
+          {topSlot}
+        </section>
+        {children}
+      </main>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: src/components/RequestFeedPanel.tsx
+================================================
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { requestStatusStyles, requestTypeLabels } from "@/lib/constants";
+import { buildDemoRequests } from "@/lib/demo";
+import {
+  getSupabaseBrowserClient,
+  hasSupabaseConfig,
+} from "@/lib/supabase/client";
+import type { RequestRecord } from "@/lib/types";
+
+export function RequestFeedPanel() {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
+  const [requests, setRequests] = useState<RequestRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<number | null>(null);
+
+  const fetchRequests = useCallback(async () => {
+    setError(null);
+
+    if (!supabase) {
+      setRequests(buildDemoRequests());
+      setLoading(false);
+      return;
+    }
+
+    const { data, error: dbError } = await supabase
+      .from("requests")
+      .select("id, room_number, request_type, status, created_at")
+      .order("created_at", { ascending: false });
+
+    if (dbError) {
+      setError(dbError.message);
+      setLoading(false);
+      return;
+    }
+
+    setRequests((data ?? []) as RequestRecord[]);
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => {
+    void fetchRequests();
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`requests-live-${Date.now()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "requests" },
+        () => {
+          void fetchRequests();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [fetchRequests, supabase]);
+
+  async function markCompleted(id: number) {
+    setError(null);
+    setWorkingId(id);
+
+    if (!supabase) {
+      setRequests((prev) =>
+        prev.map((request) =>
+          request.id === id ? { ...request, status: "completed" } : request,
+        ),
+      );
+      setWorkingId(null);
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from("requests")
+      .update({ status: "completed" })
+      .eq("id", id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setWorkingId(null);
+      return;
+    }
+
+    setRequests((prev) =>
+      prev.map((request) =>
+        request.id === id ? { ...request, status: "completed" } : request,
+      ),
+    );
+    setWorkingId(null);
+  }
+
+  return (
+    <section className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6">
+      {!hasSupabaseConfig && (
+        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+          Demo mode is active. Add Supabase env keys for live guest requests.
+        </div>
+      )}
+
+      {error && (
+        <p className="mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+          {error}
+        </p>
+      )}
+
+      {loading ? (
+        <p className="text-sm text-slate-600 dark:text-slate-300">Loading requests...</p>
+      ) : requests.length === 0 ? (
+        <p className="text-sm text-slate-600 dark:text-slate-300">No guest requests right now.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {requests.map((request) => (
+            <article
+              key={request.id}
+              className="staff-mode-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            >
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0">
+                  <p className="text-base font-semibold leading-6 text-slate-900 dark:text-slate-100">
+                    Room {request.room_number} - {requestTypeLabels[request.request_type]}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    {new Date(request.created_at).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                  <span
+                    className={`staff-mode-badge rounded-full px-3 py-1 text-xs font-semibold ${requestStatusStyles[request.status]}`}
+                  >
+                    {request.status}
+                  </span>
+                  {request.status === "pending" && (
+                    <button
+                      type="button"
+                      disabled={workingId === request.id}
+                      onClick={() => {
+                        void markCompleted(request.id);
+                      }}
+                      className="staff-mode-action staff-mode-action-primary bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-60 dark:bg-slate-700 dark:hover:bg-slate-600"
+                    >
+                      Mark Completed
+                    </button>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+
+
+================================================
+FILE: src/components/RoomOperationsBoard.tsx
+================================================
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { roomStatusStyles } from "@/lib/constants";
+import { buildDemoRequests, buildDemoRooms, guestNameForRoom } from "@/lib/demo";
+import {
+  getSupabaseBrowserClient,
+  hasSupabaseConfig,
+} from "@/lib/supabase/client";
+import type { RoomRecord, RoomStatus, StaffRole } from "@/lib/types";
+
+type BoardMode = "manager" | StaffRole;
+
+type RoomAction = {
+  label: string;
+  nextStatus: RoomStatus;
+};
+
+const actionsByRole: Record<StaffRole, RoomAction[]> = {
+  frontdesk: [
+    { label: "Check In Guest", nextStatus: "occupied" },
+    { label: "Check Out Guest", nextStatus: "needs_cleaning" },
+    { label: "Mark Reserved", nextStatus: "occupied" },
+    { label: "Report Maintenance", nextStatus: "maintenance" },
+  ],
+  housekeeping: [
+    { label: "Start Cleaning", nextStatus: "cleaning" },
+    { label: "Mark as Cleaned", nextStatus: "ready" },
+    { label: "Report Issue", nextStatus: "maintenance" },
+  ],
+};
+
+const summaryLabels: Array<{ key: RoomStatus; label: string }> = [
+  { key: "occupied", label: "Occupied" },
+  { key: "ready", label: "Ready" },
+  { key: "cleaning", label: "Cleaning" },
+  { key: "maintenance", label: "Maintenance" },
+  { key: "needs_cleaning", label: "Needs Cleaning" },
+];
+
+export function RoomOperationsBoard({ mode }: { mode: BoardMode }) {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const actionsPanelRef = useRef<HTMLElement | null>(null);
+
+  const [rooms, setRooms] = useState<RoomRecord[]>([]);
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [activeRole, setActiveRole] = useState<StaffRole>(
+    mode === "housekeeping" ? "housekeeping" : "frontdesk",
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [isWorking, setIsWorking] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const fetchRooms = useCallback(async () => {
+    setErrorMessage(null);
+
+    if (!supabase) {
+      setRooms(buildDemoRooms());
+      setIsLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("rooms")
+      .select("id, room_number, status, last_updated")
+      .order("room_number", { ascending: true });
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    setRooms((data ?? []) as RoomRecord[]);
+    setIsLoading(false);
+  }, [supabase]);
+
+  const fetchPendingRequests = useCallback(async () => {
+    if (!supabase) {
+      const pendingInDemo = buildDemoRequests().filter(
+        (request) => request.status === "pending",
+      ).length;
+      setPendingRequests(pendingInDemo);
+      return;
+    }
+
+    const { count } = await supabase
+      .from("requests")
+      .select("id", { head: true, count: "exact" })
+      .eq("status", "pending");
+
+    setPendingRequests(count ?? 0);
+  }, [supabase]);
+
+  useEffect(() => {
+    void fetchRooms();
+    void fetchPendingRequests();
+  }, [fetchPendingRequests, fetchRooms]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`rooms-live-${mode}-${Date.now()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "rooms" },
+        () => {
+          void fetchRooms();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [fetchRooms, mode, supabase]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`requests-count-${mode}-${Date.now()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "requests" },
+        () => {
+          void fetchPendingRequests();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [fetchPendingRequests, mode, supabase]);
+
+  const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
+
+  useEffect(() => {
+    if (selectedRoomId === null) {
+      return;
+    }
+
+    if (!window.matchMedia("(max-width: 1023px)").matches) {
+      return;
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      actionsPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, [selectedRoomId]);
+
+  const stats = useMemo(() => {
+    return rooms.reduce<Record<RoomStatus, number>>(
+      (acc, room) => {
+        acc[room.status] += 1;
+        return acc;
+      },
+      {
+        occupied: 0,
+        needs_cleaning: 0,
+        cleaning: 0,
+        ready: 0,
+        maintenance: 0,
+      },
+    );
+  }, [rooms]);
+
+  const occupancyRate = useMemo(() => {
+    if (rooms.length === 0) {
+      return 0;
+    }
+
+    return Math.round((stats.occupied / rooms.length) * 100);
+  }, [rooms.length, stats.occupied]);
+
+  const averageTurnoverMinutes = useMemo(() => {
+    const activeTurnoverRooms = rooms.filter(
+      (room) => room.status === "needs_cleaning" || room.status === "cleaning",
+    );
+
+    if (activeTurnoverRooms.length === 0) {
+      return 0;
+    }
+
+    // Estimate turnover time using how long rooms have been in turnover-related states.
+    const totalMinutes = activeTurnoverRooms.reduce((total, room) => {
+      const elapsedMs = Date.now() - new Date(room.last_updated).getTime();
+      const elapsedMinutes = Math.max(0, Math.round(elapsedMs / 60000));
+      return total + elapsedMinutes;
+    }, 0);
+
+    return Math.round(totalMinutes / activeTurnoverRooms.length);
+  }, [rooms]);
+
+  async function handleStatusChange(nextStatus: RoomStatus) {
+    if (!selectedRoom) {
+      return;
+    }
+
+    setIsWorking(true);
+    setErrorMessage(null);
+
+    const lastUpdated = new Date().toISOString();
+
+    if (!supabase) {
+      setRooms((prev) =>
+        prev.map((room) =>
+          room.id === selectedRoom.id
+            ? { ...room, status: nextStatus, last_updated: lastUpdated }
+            : room,
+        ),
+      );
+      setIsWorking(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("rooms")
+      .update({ status: nextStatus, last_updated: lastUpdated })
+      .eq("id", selectedRoom.id);
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsWorking(false);
+      return;
+    }
+
+    setRooms((prev) =>
+      prev.map((room) =>
+        room.id === selectedRoom.id
+          ? { ...room, status: nextStatus, last_updated: lastUpdated }
+          : room,
+      ),
+    );
+    setIsWorking(false);
+  }
+
+  const roleInUse = mode === "manager" ? activeRole : mode;
+
+  return (
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6">
+      {!hasSupabaseConfig && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+          Running in local demo mode. Add NEXT_PUBLIC_SUPABASE_URL and
+          NEXT_PUBLIC_SUPABASE_ANON_KEY to enable database + realtime sync.
+        </div>
+      )}
+
+      {mode !== "manager" && (
+        <div className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          Pending guest requests: <strong>{pendingRequests}</strong> (live)
+        </div>
+      )}
+
+      {mode === "manager" && (
+        <div className="grid gap-3 lg:grid-cols-3">
+          <article className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              Occupancy Rate
+            </p>
+            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {occupancyRate}%
+            </p>
+          </article>
+          <article className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <p
+              className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400"
+              title="Average minutes rooms spend in needs-cleaning/cleaning states."
+            >
+              Avg Room Turnover Time
+            </p>
+            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {averageTurnoverMinutes} min
+            </p>
+          </article>
+          <article className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <p
+              className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400"
+              title="This updates in realtime whenever a guest request is added or completed."
+            >
+              Pending Guest Requests
+            </p>
+            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {pendingRequests}
+            </p>
+          </article>
+        </div>
+      )}
+
+      {mode === "manager" && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveRole("frontdesk")}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              activeRole === "frontdesk"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+            }`}
+          >
+            Front Desk Actions
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveRole("housekeeping")}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              activeRole === "housekeeping"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+            }`}
+          >
+            Housekeeping Actions
+          </button>
+        </div>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {summaryLabels.map((item) => (
+          <article
+            key={item.key}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+          >
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              {item.label}
+            </p>
+            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {stats[item.key]}
+            </p>
+          </article>
+        ))}
+      </div>
+
+      {errorMessage && (
+        <p className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+          {errorMessage}
+        </p>
+      )}
+
+      {isLoading ? (
+        <p className="text-sm text-slate-600 dark:text-slate-300">Loading room board...</p>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {rooms.map((room) => {
+              const statusTheme = roomStatusStyles[room.status];
+              const isSelected = room.id === selectedRoomId;
+
+              return (
+                <button
+                  key={room.id}
+                  type="button"
+                  onClick={() => setSelectedRoomId(room.id)}
+                  className={`staff-mode-card min-h-32 w-full rounded-xl border p-4 text-left shadow-sm transition hover:scale-[1.01] dark:border-slate-600 ${statusTheme.card} ${
+                    isSelected ? "ring-2 ring-slate-900/30" : ""
+                  }`}
+                >
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-700 dark:text-slate-800">
+                    Room
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900">{room.room_number}</p>
+                  <span
+                    className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusTheme.badge}`}
+                  >
+                    {statusTheme.label}
+                  </span>
+                  <p className="mt-3 text-xs text-slate-700 dark:text-slate-800">
+                    Guest: {room.status === "occupied" ? guestNameForRoom(room.room_number) : "-"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <aside
+            ref={actionsPanelRef}
+            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+          >
+            {selectedRoom ? (
+              <>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Room {selectedRoom.room_number}
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Status: {roomStatusStyles[selectedRoom.status].label}
+                </p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                  Guest: {guestNameForRoom(selectedRoom.room_number)}
+                </p>
+                <div className="mt-4 space-y-2">
+                  {actionsByRole[roleInUse].map((action) => (
+                    <button
+                      key={action.label}
+                      type="button"
+                      disabled={isWorking}
+                      onClick={() => {
+                        void handleStatusChange(action.nextStatus);
+                      }}
+                      className="staff-mode-action staff-mode-action-primary border border-slate-300 text-slate-800 dark:border-slate-600 dark:text-slate-100"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRoomId(null)}
+                    className="staff-mode-action staff-mode-action-secondary border border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                Select a room card to see role-based actions.
+              </p>
+            )}
+          </aside>
+        </div>
+      )}
+    </section>
+  );
+}
+
+
+
+================================================
+FILE: src/components/ThemeToggle.tsx
+================================================
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Theme = "light" | "dark";
+
+const storageKey = "hotel-demo-theme";
+
+function getPreferredTheme(): Theme {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  const stored = window.localStorage.getItem(storageKey);
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+}
+
+export function ThemeToggle({ className = "" }: { className?: string }) {
+  const [theme, setTheme] = useState<Theme>(() => getPreferredTheme());
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    const nextTheme: Theme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+    window.localStorage.setItem(storageKey, nextTheme);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className={`inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:focus-visible:ring-slate-300 ${className}`}
+      aria-label="Toggle dark mode"
+      title="Toggle dark mode"
+    >
+      {theme === "dark" ? "Light" : "Dark"} Mode
+    </button>
+  );
+}
+
+
+
+================================================
+FILE: src/lib/constants.ts
+================================================
+import type { RequestStatus, RequestType, RoomStatus } from "@/lib/types";
+
+export const roomStatusStyles: Record<
+  RoomStatus,
+  { card: string; badge: string; label: string }
+> = {
+  ready: {
+    card: "bg-emerald-100 border-emerald-400",
+    badge: "bg-emerald-600 text-white",
+    label: "Ready",
+  },
+  occupied: {
+    card: "bg-rose-100 border-rose-400",
+    badge: "bg-rose-600 text-white",
+    label: "Occupied",
+  },
+  cleaning: {
+    card: "bg-amber-100 border-amber-400",
+    badge: "bg-amber-600 text-white",
+    label: "Cleaning",
+  },
+  needs_cleaning: {
+    card: "bg-orange-100 border-orange-400",
+    badge: "bg-orange-600 text-white",
+    label: "Needs Cleaning",
+  },
+  maintenance: {
+    card: "bg-sky-100 border-sky-400",
+    badge: "bg-sky-600 text-white",
+    label: "Maintenance",
+  },
+};
+
+export const requestTypeLabels: Record<RequestType, string> = {
+  towels: "Towels Requested",
+  housekeeping: "Housekeeping Request",
+  late_checkout: "Late Checkout",
+  food: "Food Order",
+  hotel_services: "View Hotel Services",
+};
+
+export const requestStatusStyles: Record<RequestStatus, string> = {
+  pending: "bg-amber-100 text-amber-900 border border-amber-300",
+  completed: "bg-emerald-100 text-emerald-900 border border-emerald-300",
+};
+
+
+
+================================================
+FILE: src/lib/demo.ts
+================================================
+import type { RequestRecord, RoomRecord, RoomStatus } from "@/lib/types";
+
+const statusCycle: RoomStatus[] = [
+  "ready",
+  "occupied",
+  "needs_cleaning",
+  "cleaning",
+  "maintenance",
+];
+
+const guestNames = [
+  "Alex Rivera",
+  "Maya Thompson",
+  "Noah Patel",
+  "Zoe Kim",
+  "Omar Hassan",
+  "Emma Brooks",
+  "Liam Chen",
+  "Sofia Martin",
+];
+
+export function guestNameForRoom(roomNumber: string): string {
+  const numeric = Number(roomNumber.replace(/\D/g, ""));
+  return guestNames[numeric % guestNames.length] ?? "Guest";
+}
+
+export function buildDemoRooms(): RoomRecord[] {
+  return Array.from({ length: 20 }, (_, idx) => {
+    const roomNumber = String(101 + idx);
+
+    return {
+      id: idx + 1,
+      room_number: roomNumber,
+      status: statusCycle[idx % statusCycle.length],
+      last_updated: new Date(Date.now() - idx * 30 * 60 * 1000).toISOString(),
+    };
+  });
+}
+
+export function buildDemoRequests(): RequestRecord[] {
+  return [
+    {
+      id: 1,
+      room_number: "104",
+      request_type: "towels",
+      status: "pending",
+      created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 2,
+      room_number: "118",
+      request_type: "late_checkout",
+      status: "pending",
+      created_at: new Date(Date.now() - 11 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      room_number: "115",
+      request_type: "housekeeping",
+      status: "pending",
+      created_at: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+    },
+  ];
+}
+
+
+
+================================================
+FILE: src/lib/types.ts
+================================================
+export const ROOM_STATUSES = [
+  "occupied",
+  "needs_cleaning",
+  "cleaning",
+  "ready",
+  "maintenance",
+] as const;
+
+export type RoomStatus = (typeof ROOM_STATUSES)[number];
+
+export const REQUEST_TYPES = [
+  "towels",
+  "housekeeping",
+  "late_checkout",
+  "food",
+  "hotel_services",
+] as const;
+
+export type RequestType = (typeof REQUEST_TYPES)[number];
+
+export const REQUEST_STATUSES = ["pending", "completed"] as const;
+
+export type RequestStatus = (typeof REQUEST_STATUSES)[number];
+
+export type StaffRole = "frontdesk" | "housekeeping";
+
+export interface RoomRecord {
+  id: number;
+  room_number: string;
+  status: RoomStatus;
+  last_updated: string;
+}
+
+export interface RequestRecord {
+  id: number;
+  room_number: string;
+  request_type: RequestType;
+  status: RequestStatus;
+  created_at: string;
+}
+
+
+
+================================================
+FILE: src/lib/supabase/client.ts
+================================================
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+
+let browserClient: SupabaseClient | null = null;
+
+export function getSupabaseBrowserClient(): SupabaseClient | null {
+  if (!hasSupabaseConfig) {
+    return null;
+  }
+
+  if (!browserClient) {
+    browserClient = createClient(supabaseUrl!, supabaseAnonKey!);
+  }
+
+  return browserClient;
+}
+
+
+
+================================================
+FILE: supabase/schema.sql
+================================================
+-- Hotel operations demo schema for Supabase
+-- Run this in the Supabase SQL editor.
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'room_status') then
+    create type room_status as enum (
+      'occupied',
+      'needs_cleaning',
+      'cleaning',
+      'ready',
+      'maintenance'
+    );
+  end if;
+end
+$$;
+
+create table if not exists public.rooms (
+  id bigint generated always as identity primary key,
+  room_number text not null unique,
+  status room_status not null default 'ready',
+  last_updated timestamptz not null default now()
+);
+
+create table if not exists public.requests (
+  id bigint generated always as identity primary key,
+  room_number text not null,
+  request_type text not null check (request_type in (
+    'towels',
+    'housekeeping',
+    'late_checkout',
+    'food',
+    'hotel_services'
+  )),
+  status text not null default 'pending' check (status in ('pending', 'completed')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.rooms enable row level security;
+alter table public.requests enable row level security;
+
+-- Open demo policies (not for production).
+drop policy if exists "rooms_select_all" on public.rooms;
+create policy "rooms_select_all"
+  on public.rooms
+  for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "rooms_update_all" on public.rooms;
+create policy "rooms_update_all"
+  on public.rooms
+  for update
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+drop policy if exists "requests_select_all" on public.requests;
+create policy "requests_select_all"
+  on public.requests
+  for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "requests_insert_all" on public.requests;
+create policy "requests_insert_all"
+  on public.requests
+  for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "requests_update_all" on public.requests;
+create policy "requests_update_all"
+  on public.requests
+  for update
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+insert into public.rooms (room_number, status, last_updated)
+select
+  room_num::text,
+  (array['ready', 'occupied', 'needs_cleaning', 'cleaning', 'maintenance'])[((row_num - 1) % 5) + 1]::room_status,
+  now() - make_interval(mins => row_num * 8)
+from (
+  select room_num, row_number() over (order by room_num) as row_num
+  from generate_series(101, 120) as room_num
+) as generated
+on conflict (room_number) do update
+set
+  status = excluded.status,
+  last_updated = excluded.last_updated;
+
+insert into public.requests (room_number, request_type, status, created_at)
+values
+  ('104', 'towels', 'pending', now() - interval '7 minutes'),
+  ('118', 'late_checkout', 'pending', now() - interval '15 minutes'),
+  ('115', 'housekeeping', 'pending', now() - interval '22 minutes')
+on conflict do nothing;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'rooms'
+  ) then
+    alter publication supabase_realtime add table public.rooms;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'requests'
+  ) then
+    alter publication supabase_realtime add table public.requests;
+  end if;
+end
+$$;
+
+

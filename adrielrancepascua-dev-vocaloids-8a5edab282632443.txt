@@ -1,0 +1,4778 @@
+Directory structure:
+└── adrielrancepascua-dev-vocaloids/
+    ├── README.md
+    ├── ARCHITECTURE.md
+    ├── eslint.config.js
+    ├── next-env.d.ts
+    ├── next.config.mjs
+    ├── package.json
+    ├── SEO_GUIDE.md
+    ├── tsconfig.app.json
+    ├── tsconfig.json
+    ├── tsconfig.node.json
+    ├── WORKSPACE_GUIDE.md
+    ├── .env.example
+    ├── public/
+    │   ├── google6fd398105c6d0bf5.html
+    │   └── robots.txt
+    └── src/
+        ├── App.css
+        ├── app/
+        │   ├── globals.css
+        │   ├── layout.tsx
+        │   ├── page.tsx
+        │   ├── character/
+        │   │   ├── miku/
+        │   │   │   └── page.tsx
+        │   │   ├── neru/
+        │   │   │   └── page.tsx
+        │   │   └── teto/
+        │   │       └── page.tsx
+        │   ├── shop/
+        │   │   └── page.tsx
+        │   ├── sitemap.xml/
+        │   │   └── route.ts
+        │   └── song/
+        │       └── [slug]/
+        │           ├── BackButton.tsx
+        │           ├── page.tsx
+        │           └── SongClientEmbed.tsx
+        ├── components/
+        │   ├── AudioVisualizerCanvas.tsx
+        │   ├── CharacterHero.tsx
+        │   ├── CharacterTabs.tsx
+        │   ├── CustomCursor.tsx
+        │   ├── ECGMonitor.tsx
+        │   ├── LoadingScreen.tsx
+        │   ├── MainStage.tsx
+        │   ├── Overlay.tsx
+        │   ├── SEO.tsx
+        │   ├── TerminalChat.tsx
+        │   └── YouTubeEmbed.tsx
+        ├── config/
+        │   └── vocaloidData.ts
+        ├── constants/
+        │   └── theme.ts
+        ├── contexts/
+        │   └── VibeProvider.tsx
+        ├── hooks/
+        │   ├── usePerformanceMonitor.ts
+        │   └── useVocaloidAudio.ts
+        ├── lib/
+        │   ├── analytics.ts
+        │   └── jsonld.ts
+        ├── sanity/
+        │   ├── README.md
+        │   ├── client.ts
+        │   ├── mockData.ts
+        │   └── schemas/
+        │       ├── character.ts
+        │       └── song.ts
+        └── workers/
+            └── audioMath.worker.ts
+
+================================================
+FILE: README.md
+================================================
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+This workspace is a Next.js TypeScript site for showcasing Vocaloid-style characters and songs.
+
+Key details
+- Framework: Next.js (App Router) with TypeScript
+- Purpose: site for characters, songs, shop, and audio experiences
+- Major folders:
+  - `src/app/` — application routes and pages
+  - `src/components/` — reusable React components (audio visualizer, embeds, UI)
+  - `src/assets/` and `public/` — images, audio, and static files
+  - `src/lib/`, `src/hooks/`, `src/context/` — utilities and app state
+  - `src/sanity/` — Sanity client and schemas for content
+
+Development
+- Install: `npm install`
+- Dev server: `npm run dev`
+- Build: `npm run build`
+
+Notes
+- This project includes a web worker for audio math and several client components that depend on browser APIs.
+- See `WORKSPACE_GUIDE.md` and `ARCHITECTURE.md` for more architecture and conventions.
+
+Contributing
+- Open a PR against the repository; follow existing code style and TypeScript settings.
+
+Repository
+- Remote: https://github.com/adrielrancepascua-dev/vocaloids
+
+Contact
+- Maintainer: adrielrancepascua-dev
+
+
+
+================================================
+FILE: ARCHITECTURE.md
+================================================
+# Vocaloid Interactive Portfolio
+**Architecture & Design Document**
+
+## 1. Overview & Tech Stack
+An immersive, highly interactive single-page portfolio profiling iconic Vocaloids (Hatsune Miku, Kasane Teto, Akita Neru). The application mirrors a "high-end video game intro" with visceral animations, seamless audio transitions, and heavily stylized UI components.
+
+* **Core:** React 19, TypeScript, Vite
+* **Styling:** Tailwind CSS 4, native CSS variables for dynamic theming
+* **Animations:** Framer Motion v12
+* **Audio Engine:** Native Web Audio API (via custom React Hook)
+
+---
+
+## 2. Application Architecture
+
+### Theme Management (`VibeProvider.tsx`)
+The app uses a global Context (`useVibe`) to manage the `activeCharacter`. Whenever a user scrolls to a new character, the provider intercepts the change and injects global CSS variables (`--primary-color`, secondary gradients, and glow shadows) directly into the `document.documentElement`. This ensures elements system-wide instantly react to the current character's signature color.
+
+### The Audio Engine (`useVocaloidAudio.ts`, `AudioVisualizerCanvas.tsx`, & `audioMath.worker.ts`)
+A robust Web Audio API abstraction that bypasses standard HTML5 `<audio>` limitations:
+* **Parallel Track Execution:** The engine initializes all tracks simultaneously in the background (using parallel `AudioBufferSourceNode.start()`) running at current time.
+* **Seamless Crossfading:** When switching characters, the engine relies solely on manipulating `GainNode` amplitudes via `linearRampToValueAtTime`, bringing the active track to `1` and silencing the others over 1.2 seconds without track restarts.
+* **Audio Routing Context:** `AudioBufferSourceNode -> GainNode -> AnalyserNode -> BiquadFilterNode -> Master Gain -> Destination`
+* **Default Volume:** `masterGain` defaults to `0.15`.
+* **Worker Offloading:** Heavy `Uint8Array` frequency analysis via `AnalyserNode.getByteFrequencyData()` is offloaded to a dedicated Web Worker (`audioMath.worker.ts`), providing low-latency transients for React UI without blocking the main render thread.
+* **The "Muffled Room" Filter:** A dynamic `BiquadFilterNode` sits in the path. Defaulting to 24000Hz (full clarity). When the user scrolls down into a character's Data Tabs, it smooth-ramps down to `800Hz` using `exponentialRampToValueAtTime`—audibly shearing off the high frequencies to simulate listening to the concert from an adjacent room.
+
+### Performance & Engine Scaling (`usePerformanceMonitor.ts`)
+A dedicated performance monitoring hook designed to manage "Triple-A" tier graphics scaling:
+* Calculates a 60-frame moving exponential average of `requestAnimationFrame` deltas.
+* Yields a deferred `isLowEnd` flag using React 19's `useDeferredValue` when FPS drops consistently below 55.
+* Elements like `AudioVisualizerCanvas.tsx` subscribe to this hook to dynamically downscale visually intense particle limits (e.g., from 150 to 40) avoiding thermal throttling on weaker hardware.
+
+---
+
+## 3. Component Layout & Flow
+
+The user journey operates on a strictly linear, cinematic pipeline:
+
+### Phase 1: The Loading Screen (`LoadingScreen.tsx` & `HeartRateMonitor.tsx`)
+* Blocks the entire UI until all simulated/actual assets resolve.
+* **The Bio-Monitor:** A clinically accurate ECG visualization taking the place of standard loading bars. It dynamically renders SVG path sweeps representing Normal Sinus Rhythms (Miku, 75 BPM), Tachycardia (Teto, 120 BPM), and Bradycardia (Neru, 55 BPM). The Y-axis path data flexes reactively to the Web Audio API's realtime Bass extraction.
+* **The Unlock:** A "Start Experience" button securely unlocks the audio context and transitions `unlocked` to true.
+* **The Transition:** Uses Framer Motion's `<AnimatePresence>` to execute a cinematic 800ms fade/blur-out as the overlay is destroyed. 
+
+### Phase 2: The Main Stage (`MainStage.tsx`)
+The primary scroll container using CSS Snap scrolling (`snap-y snap-mandatory`). 
+* Iterates through the `vocaloidData` array.
+* Each Character Section is specifically sized to **`200vh`** to accommodate a strict two-screen narrative.
+* **Scroll-Triggered Context:** Utilizes Framer Motion's `useInView` linked to the *entire* 200vh section node (triggering softly at 20% intersection). This prevents theme reversion issues when rapidly scrolling "up" from Character B's tab layout into Character A's tab layout, maintaining correct global audio and color states.
+* **Scroll-Triggered Audio Muffle:** A secondary `useInView` monitors specifically the Tab screen triggering at `40%`. Doing so alerts `MainStage` to fire `setMuffleEffect` engaging our BiquadFilter logic.
+
+**Screen 1: The Hero (`CharacterHero.tsx`)**
+* Displays the character's massive typography and tagline.
+* Universal Character Zoom: The core character `<img />` tags use `object-contain scale-90` sizing parameters to pull their models slightly back allowing maximum UI visibility.
+* Implements a Lead Creative Director "immersive terminal" visual noise layout across all factions:
+  * **Global Noise Layer:** Includes massive 45vw alpha-transparent background watermarks mapped to character designations (`01`, `04`, `DEN2`).
+  * **Global Scanlines:** Projects a recursive `repeating-linear-gradient` CRT overlay bounding over the primary wrapper.
+  * **Technical Dossier:** Corners are augmented with static system stats (top corners) and dynamic, reactive hardware stats (bottom corners logging real-time `X, Y` coordinates).
+* Re-designed container aesthetics that abandon traditional flat rectangular logic based on lore triggers (`isMiku`, `isTeto`, `isNeru`):
+  * **Miku:** Transparent PNG cutout with `drop-shadow` neon values reactive to cursor physics, replacing the spotlight.
+  * **Teto:** High-intensity Industrial Glitch, hard-coded caution tape overlay filters, and hardware X-axis jitter algorithms to fake a broken layer boundary.
+  * **Neru:** Monospace "Bored" aesthetic enforcing an animated "LOW BATTERY" diagnostic flag overriding the top-right frame paired with mix-blend `feTurbulence` SVG static filters.
+
+**Screen 2: The Data Tabs (`CharacterTabs.tsx`)**
+* Accessible by scrolling down from the Hero.
+* Implements full-bleed parallax `bgImage` integration overlaid with a deep `bg-black/70 backdrop-blur-md` to ensure UI contrast against visually aggressive wallpapers.
+* A darkened data screen containing four strictly customized tabs:
+  * **About / Lore:** Injects the narrative description and dynamically mapped `loreMetric`.
+  * **Stats Base:** Glassmorphic layout pulling `Age, Height, Weight`, and `Model Status` system flags.
+  * **Influence:** Static mapping of visual/audio genre influence parameters.
+  * **Top Songs:** Dynamic play count calculations utilizing animated SVG progress bars for "Iconic Audio Data".
+* Includes a "Next Character" button at the bottom that uses `scrollIntoView` to seamlessly auto-pan to the next character's Hero section.
+
+---
+
+## 4. Animation & Visual Effects 
+*All heavy lifting is done via Framer Motion & CSS tricks.*
+
+* **The Spring Cursor (`CustomCursor.tsx`):** Hand-built cursor using `useMotionValue` and `useSpring`. Mass is set to `0.1` and stiffness to `800` for ultra-snappy responsiveness. It inherits the theme color dynamically. 
+* **Dynamic Record SVG:** If you hover over a specific element with `data-cursor="record"`, the cursor scales up and morphs into a spinning SVG vinyl record colored by the active character.
+* **Spotlight Card Effect:** Inside the `CharacterHero`, a dynamic radial gradient tracks the `mouseX` and `mouseY` position over the image container, creating a flashlight reveal effect using `WebkitMaskImage`.
+* **RGB Splitting Glitch:** Text in the hero utilizes a dual-layer technique. Every 20 seconds, a `useEffect` triggers a state change. For 50 milliseconds, a Red text node shifts -4px and a Blue text node shifts +4px. They snap back instantly, creating a hardware-chromatic aberration (glitch) effect.
+* **Fluid Layout Anchoring:** The `CharacterTabs` uses Framer Motion's `layoutId="character-tabs-underline"` to physically animate the glowing underline between tabs when clicked, rather than snapping immediately.
+
+
+================================================
+FILE: eslint.config.js
+================================================
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+  },
+])
+
+
+
+================================================
+FILE: next-env.d.ts
+================================================
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+import "./.next/types/routes.d.ts";
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+
+
+
+================================================
+FILE: next.config.mjs
+================================================
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  allowedDevOrigins: ['192.168.100.62', 'localhost:3000'],
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      }
+    ],
+  }
+};
+
+export default nextConfig;
+
+
+
+================================================
+FILE: package.json
+================================================
+{
+  "name": "vocaloid",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@fontsource/inter-tight": "^5.2.7",
+    "@portabletext/react": "^6.0.3",
+    "@vercel/analytics": "^2.0.1",
+    "framer-motion": "^12.38.0",
+    "motion": "^12.38.0",
+    "next": "^16.2.1",
+    "next-sanity": "^12.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sanity": "^5.18.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.5.3",
+    "typescript": "~5.7.0"
+  }
+}
+
+
+
+================================================
+FILE: SEO_GUIDE.md
+================================================
+# SEO Optimization Guide
+
+This Next.js project includes comprehensive SEO optimization features to improve search engine visibility and social media sharing.
+
+## Features Implemented
+
+### 1. **Reusable SEO Component** (`src/components/SEO.tsx`)
+A TypeScript-first SEO component that provides:
+- Title, description, keywords
+- Open Graph (OG) meta tags for social media
+- Twitter Card tags
+- Canonical URLs
+- Author and publication date metadata
+
+**Usage:**
+```typescript
+import { generateSeoMetadata } from '@/components/SEO';
+
+export const generateMetadata = () => {
+  return generateSeoMetadata({
+    title: 'Your Page Title',
+    description: 'Your page description',
+    keywords: ['keyword1', 'keyword2'],
+    ogImage: 'https://...',
+  });
+};
+```
+
+### 2. **JSON-LD Structured Data** (`src/lib/jsonld.ts`)
+Comprehensive schema helpers for:
+- **Organization Schema**: Website/company information
+- **MusicArtist Schema**: Vocaloid character profiles
+- **MusicRecording Schema**: Individual song metadata
+- **Breadcrumb Schema**: Navigation hierarchy
+- **WebPage Schema**: Generic page information
+
+**Usage in Pages:**
+```typescript
+import { createSongSchema, createBreadcrumbSchema } from '@/lib/jsonld';
+import Script from 'next/script';
+
+const songSchema = createSongSchema(...);
+const breadcrumbSchema = createBreadcrumbSchema(...);
+
+<Script id="song-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(songSchema) }} />
+<Script id="breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+```
+
+### 3. **Dynamic Sitemap Generation** (`src/app/sitemap.xml/route.ts`)
+Automatically generates `sitemap.xml` at `/sitemap.xml` containing:
+- All static pages (/, /shop)
+- All character pages
+- All song pages with:
+  - Last modified dates
+  - Change frequency
+  - Priority levels
+  - Proper XML escaping
+
+**Access:** `https://yourdomain.com/sitemap.xml`
+
+### 4. **Robots.txt** (`public/robots.txt`)
+Configured with:
+- Allow/Disallow rules
+- Sitemap reference
+- User-agent specific crawl delays
+- Rate limiting for aggressive bots
+
+### 5. **Meta Tags in Layout** (`src/app/layout.tsx`)
+Root layout includes:
+- Proper viewport meta tag
+- Theme color
+- Character set (UTF-8)
+- Canonical URLs
+- Open Graph and Twitter Card meta tags
+- Organization JSON-LD schema
+- Apple Touch Icon
+
+### 6. **Page-Specific SEO** (`src/app/song/[slug]/page.tsx`)
+Song pages include:
+- Unique titles and descriptions
+- Image alt text (for accessibility)
+- Comprehensive metadata generation
+- Music-specific Open Graph tags
+- Song and breadcrumb JSON-LD schemas
+- Canonical URLs for duplicate prevention
+
+## SEO Best Practices Implemented
+
+✅ **Mobile Responsiveness**
+- Viewport meta tag configured
+- Mobile-first responsive design
+
+✅ **Image Optimization**
+- Next.js Image component with automatic optimization
+- Descriptive alt text for all images
+- Proper dimensions and loading strategies
+
+✅ **Internal Linking**
+- Breadcrumb navigation
+- Semantic HTML structure
+- Related content links
+
+✅ **Performance**
+- Static page pre-rendering
+- Dynamic routes server-rendered on demand
+- Image optimization
+- CSS minification
+
+✅ **Structured Data**
+- Multiple JSON-LD schemas
+- Google-compliant markup
+- Schema.org validated
+
+✅ **Social Media**
+- Open Graph meta tags
+- Twitter Card tags
+- Share-optimized preview images
+
+## Configuration
+
+### Environment Variables
+Add to `.env.local`:
+```env
+NEXT_PUBLIC_BASE_URL=https://yourdomain.com
+```
+
+This is used for:
+- Canonical URLs
+- Absolute image URLs in schemas
+- Sitemap generation
+
+### TypeScript Path Aliases
+Configured in `tsconfig.json`:
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+## Testing SEO
+
+### Validate Markup
+- [Google Rich Results Test](https://search.google.com/test/rich-results)
+- [Schema.org Validator](https://validator.schema.org/)
+- [Open Graph Debugger](https://developers.facebook.com/tools/debug/og/object/)
+
+### See Sitemap
+Visit `/sitemap.xml` and verify all pages are listed.
+
+### Check Robots.txt
+Visit `/robots.txt` and ensure proper configuration.
+
+### Inspect Metadata
+Use browser DevTools Element Inspector to verify:
+- Meta tags in `<head>`
+- JSON-LD scripts
+- Canonical tags
+
+## Integration with Search Engines
+
+1. **Google Search Console**
+   - Upload sitemap.xml
+   - Monitor indexing status
+   - Check crawl errors
+
+2. **Bing Webmaster Tools**
+   - Submit sitemap
+   - Monitor search analytics
+
+3. **Social Media**
+   - Test OG tags with share debuggers
+   - Verify preview images
+
+## Future Enhancements
+
+- [ ] Implement XML sitemaps for images and videos
+- [ ] Add hreflang tags for internationalization
+- [ ] Implement breadcrumb schema dynamically
+- [ ] Add FAQ schema for common questions
+- [ ] Monitor Core Web Vitals (CLS, FID, LCP)
+- [ ] Implement analytics tracking for SEO metrics
+
+## Resources
+
+- [Next.js SEO Guide](https://nextjs.org/learn/seo/introduction-to-seo)
+- [Google Search Central](https://developers.google.com/search)
+- [Schema.org Documentation](https://schema.org/)
+- [Open Graph Protocol](https://ogp.me/)
+- [Twitter Card Documentation](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup)
+
+
+
+================================================
+FILE: tsconfig.app.json
+================================================
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2023",
+    "useDefineForClassFields": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    
+    /* Path alias for Next.js */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}
+
+
+
+================================================
+FILE: tsconfig.json
+================================================
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+
+
+
+================================================
+FILE: tsconfig.node.json
+================================================
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+
+================================================
+FILE: WORKSPACE_GUIDE.md
+================================================
+# Vocaloid Interactive Portfolio: Workspace Guide
+
+This document is the definitive guide to the architecture, tech stack, and structural logic of the Vocaloid Interactive Portfolio workspace. It has been updated to reflect the complete environment migration from a Vite SPA to a full-stack Next.js Application.
+
+---
+
+## 1. Overview & Tech Stack
+An immersive, highly interactive web application profiling iconic Vocaloids (Hatsune Miku, Kasane Teto, Akita Neru). The application merges "high-end video game UI" aesthetics with visceral animations, seamless audio parallel processing, dynamic SEO, and responsive visual design.
+
+**Core Technologies:**
+*   **Framework:** Next.js 16.x (App Router)
+*   **Runtime/Library:** React 19, TypeScript
+*   **Styling:** Tailwind CSS v4 (via PostCSS), native CSS variables for dynamic theming
+*   **Animations:** Framer Motion v12
+*   **Audio Engine:** Native Web Audio API (via custom React Hooks & Web Workers)
+*   **Content Management (CMS):** Sanity (Headless) integration via `next-sanity`
+
+---
+
+## 2. Directory Structure
+
+```text
+/
+├── public/                 # Static assets (Audio MP3s, Images, Base Character cutouts)
+├── src/
+│   ├── app/                # Next.js App Router (Server-side & Pages)
+│   │   ├── layout.tsx      # Root provider wrapper (Analytics, Modals)
+│   │   ├── page.tsx        # Base endpoint (/) - The Main Stage experience
+│   │   ├── shop/           # Shop endpoint (/shop) - Merch & Email conversions
+│   │   └── song/[slug]/    # Dynamic SEO endpoints for individual tracks
+│   │
+│   ├── components/         # Modular UI (Client Components)
+│   │   ├── CharacterHero.tsx       # Character display & glitch effects
+│   │   ├── CharacterTabs.tsx       # Character Lore, Stats, Top Songs
+│   │   ├── YouTubeEmbed.tsx        # Lazy-loaded, accessible YT iframes
+│   │   └── AudioVisualizer...      # Canvas-based frequency analyzers
+│   │
+│   ├── config/             # Hardcoded settings & typescript types
+│   ├── constants/          # Theme constants
+│   ├── contexts/           # React Context Providers (VibeProvider)
+│   ├── hooks/              # Custom Engine hooks (Audio, Performance)
+│   ├── lib/                # Utilities (Analytics tracking stubs)
+│   ├── sanity/             # CMS Schemas, Client bindings, and mockData fallbacks
+│   └── workers/            # Web Workers (audioMath.worker.ts) for off-thread processing
+```
+
+---
+
+## 3. Core Architecture Systems
+
+### A. The Next.js App Router & SEO
+The application leverages Next.js App Router to allow server-side rendering (SSR) for rich SEO embedding, while preserving intense client-side interactive React components via `"use client"`.
+*   **Dynamic Routing (`/song/[slug]`):** Generates dedicated metadata and injects Schema.org JSON-LD (MusicRecording/MediaObject) objects directly into the `<head>` for Google crawlers.
+*   **Hybrid Rendering:** Routes like `/shop` and `/` are heavily pre-rendered, providing blazing fast TTFB (Time to First Byte).
+
+### B. The Audio Engine (`useVocaloidAudio.ts` & `audioMath.worker.ts`)
+A robust Web Audio API abstraction that bypasses standard HTML5 `<audio>` limitations:
+*   **Parallel Execution:** Initializes all 3 music tracks simultaneously in the background (`AudioBufferSourceNode.start()`).
+*   **Seamless Crossfading:** Mutes/Unmutes active tracks purely by manipulating `GainNode` amplitudes (via `linearRampToValueAtTime`) over 1.2 seconds based on scroll position.
+*   **Worker Offloading:** Heavy byte-frequency analysis (`AnalyserNode.getByteFrequencyData()`) is offloaded to a dedicated Web Worker (`audioMath.worker.ts`). This ensures the massive UI layout and React render thread never drop frames.
+*   **The Muffled Filter:** Uses a `BiquadFilterNode` that dynamically drops higher frequencies (low-pass) when the user scrolls into the Data Tabs—simulating listening from "an adjacent room".
+
+### C. Sanity CMS & Mock Data
+Prepared for massive content scaling.
+*   The system intercepts `SANITY_PROJECT_ID` environment variables.
+*   If connected via `.env.local`, it pulls live GROQ queries from a deployed Sanity Content Lake.
+*   If local/unconnected, it perfectly falls back to `src/sanity/mockData.ts`, loading mock models of Hatsune Miku, Kasane Teto, and Akita Neru alongside 9 distinct track records.
+
+### D. Visual Effects & Performance
+*   **Adaptive Performance (`usePerformanceMonitor.ts`):** Calculates 60-frame moving exponential averages. If FPS drops below 55 (e.g. on weaker mobile devices), it toggles an `isLowEnd` flag, downgrading costly Canvas particle calculations.
+*   **Global Theming (`VibeProvider.tsx`):** Tracks the user's scroll depth natively and injects variables like `--primary-color` globally via `document.documentElement`, ensuring immediate styling sync across all tabs without complex prop-drilling.
+
+### E. Conversion Hooks
+*   **The Shop (`/shop`):** A dedicated route for placeholder fan-curated links.
+*   **Analytics Tracker:** A modular wrapper that forwards events (like `embed_play`) to `console.log` during dev.
+
+---
+
+## 4. Workflows & Commands
+
+### Running Locally
+```bash
+npm install
+npm run dev
+```
+Preview is hosted on `http://localhost:3000`.
+
+### Building for Production
+```bash
+npm run build
+npm run start
+```
+
+### Adding a New Song
+1. Add the metadata to `src/sanity/mockData.ts` (Title, bio, audio URI, `embedUrl` out to YouTube, etc).
+2. Wire it sequentially to the character arrays.
+3. The rest is completely automated: The app will update the hero UI, spawn the dynamic URL endpoint, configure the YouTube Iframe wrapper, and update the Schema.org JSON.
+
+### Resetting Next.js Cache
+Occasionally, if mock data edits do not reflect due to hard disk caching, flush the `.next` environment:
+**(Windows PowerShell):**
+```powershell
+Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npm run dev
+```
+
+
+================================================
+FILE: .env.example
+================================================
+# Vocaloid Portfolio - Environment Variables
+
+# Base URL for the application (used for SEO, canonical URLs, and sitemap)
+# Set this to your production domain when deploying
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Sanity CMS Configuration (Optional - Falls back to mockData if not set)
+# SANITY_PROJECT_ID=your_project_id
+# SANITY_DATASET=production
+# SANITY_API_VERSION=v2021-06-07
+
+
+
+================================================
+FILE: public/google6fd398105c6d0bf5.html
+================================================
+google-site-verification: google6fd398105c6d0bf5.html
+
+
+================================================
+FILE: public/robots.txt
+================================================
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /.next/
+Disallow: /shop/
+
+Sitemap: https://vocaloidportfolio.vercel.app/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Slow down aggressive bots
+User-agent: *
+Crawl-delay: 1
+Request-rate: 1/10s
+
+
+
+================================================
+FILE: src/App.css
+================================================
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+
+
+================================================
+FILE: src/app/globals.css
+================================================
+@import "tailwindcss";
+
+:root {
+  --primary-color: #39C5BB;
+  --secondary-gradient: linear-gradient(45deg, #39C5BB, #008888);
+  --custom-box-shadow: 0 4px 20px rgba(57, 197, 187, 0.4);
+}
+
+.font-inter-tight {
+  font-family: 'Inter Tight', sans-serif;
+}
+
+body.hide-cursor, body.hide-cursor * {
+  cursor: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+* {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+
+
+================================================
+FILE: src/app/layout.tsx
+================================================
+import type { Metadata } from 'next';
+import Script from 'next/script';
+import './globals.css';
+import { createOrganizationSchema } from '@/lib/jsonld';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  title: 'Vocaloid Interactive Portfolio | Hatsune Miku, Kasane Teto, Akita Neru',
+  description: 'An immersive interactive portfolio featuring iconic Vocaloids. Explore the stories, music, and lore of Hatsune Miku, Kasane Teto, and Akita Neru through an engaging digital experience.',
+  keywords: ['Vocaloid', 'Hatsune Miku', 'Kasane Teto', 'Akita Neru', 'Synthetic Music', 'Digital Singing', 'Music Production'],
+  authors: [{ name: 'Adriel Rance Pascua' }],
+  creator: 'Adriel Rance Pascua',
+  publisher: 'Adriel Rance Pascua',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: baseUrl,
+    title: 'Vocaloid Interactive Portfolio',
+    description: 'Explore the immersive world of iconic Vocaloids',
+    siteName: 'Vocaloid Interactive Portfolio',
+    images: [
+      {
+        url: `${baseUrl}/images/miku-placeholder.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'Hatsune Miku',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vocaloid Interactive Portfolio',
+    description: 'Explore iconic Vocaloids and their music',
+    creator: '@vocaloidportal',
+    images: [`${baseUrl}/images/miku-placeholder.jpg`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
+  },
+  alternates: {
+    canonical: baseUrl,
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const organizationSchema = createOrganizationSchema(baseUrl);
+
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#09090b" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="canonical" href={baseUrl} />
+        
+        {/* JSON-LD Schema for Organization */}
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
+      <body>
+        <div id="root">{children}</div>
+      </body>
+    </html>
+  );
+}
+
+
+
+================================================
+FILE: src/app/page.tsx
+================================================
+"use client";
+import { useCallback, useState, useEffect, useRef } from 'react';
+import { AnimatePresence } from 'motion/react';
+import { VibeProvider } from '../contexts/VibeProvider';
+import { LoadingScreen } from '../components/LoadingScreen';
+import { MainStage } from '../components/MainStage';
+import { CustomCursor } from '../components/CustomCursor';
+import { useVocaloidAudio } from '../hooks/useVocaloidAudio';
+import { TerminalChat } from '../components/TerminalChat';
+import '@fontsource/inter-tight/800.css';
+import '@fontsource/inter-tight/900.css';
+
+function App() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [pendingTrack, setPendingTrack] = useState<ReturnType<typeof useVocaloidAudio>["activeTrack"]>(null);
+  const [easterEggActive, setEasterEggActive] = useState(false);
+  const { switchTrack, startExperience, analyserNode, setMuffleEffect, setEasterEggMode } = useVocaloidAudio();
+  const konamiRef = useRef<string>("");
+  const mainStageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      konamiRef.current += e.key.toUpperCase();
+      if (konamiRef.current.length > 4) {
+        konamiRef.current = konamiRef.current.slice(-4);
+      }
+      if (konamiRef.current === "TETO") {
+        setEasterEggActive(prev => {
+          const next = !prev;
+          setEasterEggMode(next);
+          return next;
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setEasterEggMode]);
+
+  // Haptic Feedback / Screen Shake Loop
+  useEffect(() => {
+    let rafId: number;
+    const loop = () => {
+      if (analyserNode && mainStageRef.current) {
+        const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+        analyserNode.getByteFrequencyData(dataArray);
+        // Measure low frequency (bass) transient energy roughly
+        const bass = (dataArray[2] + dataArray[3] + dataArray[4]) / 3;
+        
+        if (bass > 240) {
+          const x = (Math.random() - 0.5) * (bass - 230) * 0.4;
+          const y = (Math.random() - 0.5) * (bass - 230) * 0.4;
+          mainStageRef.current.style.transform = `translate(${x}px, ${y}px)`;
+        } else {
+          mainStageRef.current.style.transform = `translate(0px, 0px)`;
+        }
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(rafId);
+  }, [analyserNode]);
+
+  const handleLoadingComplete = useCallback(async () => {
+    // Wait for the track to switch and then unlock so MainStage doesn't conflict immediately
+    await switchTrack('World is Mine');
+    setUnlocked(true);
+  }, [switchTrack]);
+
+  const handleCharacterTrackChange = useCallback(
+    async (track: ReturnType<typeof useVocaloidAudio>["activeTrack"]) => {      
+      if (unlocked && track) {
+        await switchTrack(track);
+      } else if (!unlocked && track) {
+        setPendingTrack(track);
+      }
+    },
+    [switchTrack, unlocked],
+  );
+
+  useEffect(() => {
+    if (unlocked && pendingTrack) {
+      switchTrack(pendingTrack);
+      setPendingTrack(null);
+    }
+  }, [unlocked, pendingTrack, switchTrack]);
+
+  return (
+    <VibeProvider>
+      <CustomCursor />
+
+      {/* We render MainStage unconditionally so it sits under the loading screen,
+          but we only wire its audio events after unlock to avoid errors */}    
+      <div
+        ref={mainStageRef}
+        className={`text-white transition-all duration-500 bg-zinc-950 min-h-screen ${easterEggActive ? 'invert hue-rotate-180 contrast-150 saturate-200' : ''}`}
+        style={{ background: 'var(--secondary-gradient)' }}
+      >
+        <MainStage onCharacterTrackChange={handleCharacterTrackChange} analyserNode={analyserNode} setMuffleEffect={setMuffleEffect} />
+      </div>
+
+      <TerminalChat />
+
+      <AnimatePresence mode="wait">
+        {!unlocked && (
+          <LoadingScreen key="loading" onLoadComplete={handleLoadingComplete} onStartExperience={startExperience} />
+        )}
+      </AnimatePresence>
+    </VibeProvider>
+  );
+}
+
+export default function Page() { return <App />; }
+
+
+
+
+================================================
+FILE: src/app/character/miku/page.tsx
+================================================
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Script from 'next/script';
+import Link from 'next/link';
+import { createCharacterSchema, createBreadcrumbSchema } from '@/lib/jsonld';
+import { generateSeoMetadata } from '@/components/SEO';
+import { mockSongs } from '@/sanity/mockData';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+const slug = 'miku';
+const characterName = 'Hatsune Miku';
+const characterDesc = 'Hatsune Miku is a virtual singing voice and cultural icon whose teal twin-tails and crystalline voice have defined modern Vocaloid fandom.';
+const ogImage = '/images/miku-placeholder.jpg';
+const canonicalUrl = `${baseUrl}/character/${slug}`;
+
+export const metadata: Metadata = generateSeoMetadata({
+  title: `${characterName} - Vocaloid Profile`,
+  description: characterDesc,
+  keywords: ['Hatsune Miku', 'Vocaloid', 'Crypton Future Media', 'Singing Synthesis', 'Virtual Idol'],
+  ogImage: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+  ogType: 'profile',
+  ogUrl: canonicalUrl,
+  canonicalUrl,
+});
+
+export default function MikuPage() {
+  const characterSchema = createCharacterSchema(
+    characterName,
+    characterDesc,
+    ogImage,
+    baseUrl + '/character',
+    slug
+  );
+
+  const breadcrumbSchema = createBreadcrumbSchema(
+    [
+      { name: 'Home', url: baseUrl },
+      { name: 'Characters', url: `${baseUrl}/#characters` },
+      { name: characterName },
+    ],
+    baseUrl
+  );
+
+  const relatedSongs = mockSongs.filter(s => s.vocaloidSlug === slug);
+
+  return (
+    <>
+      <Script
+        id={`${slug}-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(characterSchema) }}
+      />
+      <Script
+        id={`${slug}-breadcrumb-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      
+      <main className="min-h-screen bg-zinc-950 text-white font-inter-tight p-6 md:p-12 pt-24 selection:bg-[#39C5BB] selection:text-black">
+        <article className="max-w-4xl mx-auto flex flex-col gap-12 items-start mt-8">
+          <Link href="/" className="text-zinc-500 hover:text-white transition-colors flex items-center gap-2 uppercase tracking-widest text-xs font-bold mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back Home
+          </Link>
+          
+          <div className="w-full flex justify-center mb-8">
+            <div className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-[#39C5BB]/20 shadow-[0_0_30px_rgba(57,197,187,0.2)]">
+              <Image
+                src={ogImage}
+                alt={`Portrait of ${characterName}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 w-full text-zinc-300 leading-relaxed space-y-8 prose prose-invert prose-emerald max-w-none">
+            <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest text-white mb-6 border-b border-[#39C5BB]/20 pb-4">
+              {characterName}
+            </h1>
+
+            <p className="text-xl italic border-l-4 border-[#39C5BB] pl-4 py-2 bg-[#39C5BB]/5 rounded-r w-fit">
+              <strong>{characterName}</strong> is a virtual singing voice and cultural icon whose teal twin-tails and crystalline voice have defined modern Vocaloid fandom. Launched in 2007, Miku quickly became the most recognizable Vocaloid persona, inspiring thousands of songs, live holographic concerts, fan art, and international collaborations. Her presence spans music, animation, merchandise, and community-driven creativity.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Origin and History</h2>
+            <p>
+              Miku was developed by Crypton Future Media using Yamaha's Vocaloid engine. Designed as a voicebank and character package, she was intended to give creators an accessible, expressive singing voice. Over time, Miku evolved from a software product into a global phenomenon. Early viral tracks and producer communities helped her cross language barriers, and her holographic concerts demonstrated how a virtual artist can headline real-world stages.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Notable Songs and Producers</h2>
+            <p>
+              Miku's catalog is vast and varied. Producers such as ryo, kz, and livetune helped shape her early sound, while countless independent creators expanded her stylistic range. Notable tracks often associated with Miku include emotionally resonant ballads, high-energy pop, and experimental electronic pieces. When searching for "Hatsune Miku top songs," expect to find a mix of classic hits and modern fan favorites that showcase her vocal flexibility.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Visual Style and Fandom</h2>
+            <p>
+              Visually, Miku is defined by her teal color palette, futuristic outfit, and twin-tails. Fans interpret and reimagine her across genres—idol, cyberpunk, gothic, and casual everyday styles. The fandom is collaborative and prolific: illustrators, animators, choreographers, and musicians contribute to a living archive of Miku content. Cosplayers and live performers bring her designs into physical spaces, while online communities coordinate remixes and cover projects.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Impact and Cultural Reach</h2>
+            <p>
+              Miku's influence extends beyond music. She has appeared in brand campaigns, video games, and international festivals. Her concerts, using projection and motion capture, proved that virtual performers can create emotional, communal experiences. Educational projects and creative tools built around Miku have also introduced new generations to music production and digital art.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Trivia and Aliases</h2>
+            <p>
+              Fans sometimes refer to Miku with affectionate nicknames and shorthand. Her official name remains "Hatsune Miku," but regional communities may use localized spellings or nicknames. Trivia includes collaborations with mainstream artists, appearances in advertising, and the fact that her voicebank has been updated and remixed by many producers over the years.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Further Listening and Links</h2>
+            <p>
+              For newcomers, start with a curated playlist of classic and modern Miku tracks to appreciate her range. Explore producer pages and fan compilations to see how different creators shape her voice. Use the site's song pages to jump from character profile to individual recordings and back again.
+            </p>
+          </div>
+
+          {/* Related Songs Block */}
+          <div className="w-full mt-16 pt-16 border-t border-white/10">
+            <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-8 text-center text-[#39C5BB]">
+              Top Tracks featuring {characterName}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedSongs.map(song => (
+                <Link key={song.slug} href={`/song/${song.slug}`} className="group block">
+                  <div className="bg-zinc-900/50 rounded-xl overflow-hidden border border-white/5 transition-all duration-300 hover:border-[#39C5BB]/50 hover:bg-zinc-800/80">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image 
+                        src={song.coverImage || ogImage} 
+                        alt={song.title} 
+                        fill 
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-white mb-1 group-hover:text-[#39C5BB] transition-colors line-clamp-1">{song.title}</h3>
+                      <p className="text-zinc-400 text-sm font-mono mb-2">bpm {song.bpm} | {song.duration}</p>
+                      <p className="text-zinc-500 text-xs line-clamp-2">{song.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </article>
+      </main>
+    </>
+  );
+}
+
+
+================================================
+FILE: src/app/character/neru/page.tsx
+================================================
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Script from 'next/script';
+import Link from 'next/link';
+import { createCharacterSchema, createBreadcrumbSchema } from '@/lib/jsonld';
+import { generateSeoMetadata } from '@/components/SEO';
+import { mockSongs } from '@/sanity/mockData';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+const slug = 'neru';
+const characterName = 'Akita Neru';
+const characterDesc = 'Akita Neru is a fan-created character who gained traction for her sardonic personality and distinctive voice.';
+const ogImage = '/images/neru-placeholder.jpg';
+const canonicalUrl = `${baseUrl}/character/${slug}`;
+
+export const metadata: Metadata = generateSeoMetadata({
+  title: `${characterName} - Vocaloid Profile`,
+  description: characterDesc,
+  keywords: ['Akita Neru', 'Vocaloid', 'Fan Made', 'Singing Synthesis', 'Derivative Character'],
+  ogImage: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+  ogType: 'profile',
+  ogUrl: canonicalUrl,
+  canonicalUrl,
+});
+
+export default function NeruPage() {
+  const characterSchema = createCharacterSchema(
+    characterName,
+    characterDesc,
+    ogImage,
+    baseUrl + '/character',
+    slug
+  );
+
+  const breadcrumbSchema = createBreadcrumbSchema(
+    [
+      { name: 'Home', url: baseUrl },
+      { name: 'Characters', url: `${baseUrl}/#characters` },
+      { name: characterName },
+    ],
+    baseUrl
+  );
+
+  const relatedSongs = mockSongs.filter(s => s.vocaloidSlug === slug);
+
+  return (
+    <>
+      <Script
+        id={`${slug}-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(characterSchema) }}
+      />
+      <Script
+        id={`${slug}-breadcrumb-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      
+      <main className="min-h-screen bg-zinc-950 text-white font-inter-tight p-6 md:p-12 pt-24 selection:bg-[#F3C13A] selection:text-black">
+        <article className="max-w-4xl mx-auto flex flex-col gap-12 items-start mt-8">
+          <Link href="/" className="text-zinc-500 hover:text-white transition-colors flex items-center gap-2 uppercase tracking-widest text-xs font-bold mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back Home
+          </Link>
+          
+          <div className="w-full flex justify-center mb-8">
+            <div className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-[#F3C13A]/20 shadow-[0_0_30px_rgba(243,193,58,0.2)]">
+              <Image
+                src={ogImage}
+                alt={`Portrait of ${characterName}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 w-full text-zinc-300 leading-relaxed space-y-8 prose prose-invert prose-yellow max-w-none">
+            <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest text-white mb-6 border-b border-[#F3C13A]/20 pb-4">
+              {characterName}
+            </h1>
+
+            <p className="text-xl italic border-l-4 border-[#F3C13A] pl-4 py-2 bg-[#F3C13A]/5 rounded-r w-fit">
+              <strong>{characterName}</strong> is a fan-created character who gained traction for her sardonic personality and distinctive voice. Often portrayed as a laid-back, slightly mischievous counterpart to other Vocaloids, Neru's character has inspired a variety of musical styles and fan works that emphasize attitude and narrative-driven songs.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Origin and History</h2>
+            <p>
+              Neru originated within fan communities and quickly became a recurring figure in doujin music and illustrations. Her persona—wry, sometimes sarcastic—offers a contrast to more idol-like Vocaloids, making her a favorite for storytelling songs and character-driven compositions.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Notable Songs and Producers</h2>
+            <p>
+              Neru's repertoire often includes rock, alternative, and narrative pop. Producers who favor character-driven storytelling use her voice to convey complex emotions and ironic perspectives. Searching for "Akita Neru songs" will surface tracks that highlight her expressive range and the creative storytelling favored by her community.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Visual Style and Fandom</h2>
+            <p>
+              Neru's visual interpretations vary, but she is frequently shown with a casual outfit and a slightly disheveled look that matches her personality. Fans create comics, short animations, and music videos that explore her character in humorous and poignant ways. The fandom values narrative depth and character interplay.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Character Role and Influence</h2>
+            <p>
+              Neru's role in the Vocaloid ecosystem is as a character actor—she excels in songs that require attitude, irony, or a conversational tone. Her presence encourages producers to experiment with lyrical storytelling and genre blending, expanding the expressive possibilities of synthesized vocals.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Further Listening and Links</h2>
+            <p>
+              To get a sense of Neru's range, listen to narrative-driven tracks and fan-made concept albums. Follow community hubs and playlists to discover new releases and collaborative projects that feature Neru alongside other Vocaloid characters.
+            </p>
+          </div>
+
+          {/* Related Songs Block */}
+          <div className="w-full mt-16 pt-16 border-t border-white/10">
+            <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-8 text-center text-[#F3C13A]">
+              Top Tracks featuring {characterName}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedSongs.map(song => (
+                <Link key={song.slug} href={`/song/${song.slug}`} className="group block">
+                  <div className="bg-zinc-900/50 rounded-xl overflow-hidden border border-white/5 transition-all duration-300 hover:border-[#F3C13A]/50 hover:bg-zinc-800/80">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image 
+                        src={song.coverImage || ogImage} 
+                        alt={song.title} 
+                        fill 
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-white mb-1 group-hover:text-[#F3C13A] transition-colors line-clamp-1">{song.title}</h3>
+                      <p className="text-zinc-400 text-sm font-mono mb-2">bpm {song.bpm} | {song.duration}</p>
+                      <p className="text-zinc-500 text-xs line-clamp-2">{song.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </article>
+      </main>
+    </>
+  );
+}
+
+
+================================================
+FILE: src/app/character/teto/page.tsx
+================================================
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Script from 'next/script';
+import Link from 'next/link';
+import { createCharacterSchema, createBreadcrumbSchema } from '@/lib/jsonld';
+import { generateSeoMetadata } from '@/components/SEO';
+import { mockSongs } from '@/sanity/mockData';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+const slug = 'teto';
+const characterName = 'Kasane Teto';
+const characterDesc = 'Kasane Teto began as a playful internet meme and evolved into a beloved utaite-style character with a passionate fanbase.';
+const ogImage = '/images/teto-placeholder.jpg';
+const canonicalUrl = `${baseUrl}/character/${slug}`;
+
+export const metadata: Metadata = generateSeoMetadata({
+  title: `${characterName} - Vocaloid Profile`,
+  description: characterDesc,
+  keywords: ['Kasane Teto', 'UTAU', 'SynthV', 'Singing Synthesis', 'Internet Meme', 'Vocaloid'],
+  ogImage: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+  ogType: 'profile',
+  ogUrl: canonicalUrl,
+  canonicalUrl,
+});
+
+export default function TetoPage() {
+  const characterSchema = createCharacterSchema(
+    characterName,
+    characterDesc,
+    ogImage,
+    baseUrl + '/character',
+    slug
+  );
+
+  const breadcrumbSchema = createBreadcrumbSchema(
+    [
+      { name: 'Home', url: baseUrl },
+      { name: 'Characters', url: `${baseUrl}/#characters` },
+      { name: characterName },
+    ],
+    baseUrl
+  );
+
+  const relatedSongs = mockSongs.filter(s => s.vocaloidSlug === slug);
+
+  return (
+    <>
+      <Script
+        id={`${slug}-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(characterSchema) }}
+      />
+      <Script
+        id={`${slug}-breadcrumb-schema`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      
+      <main className="min-h-screen bg-zinc-950 text-white font-inter-tight p-6 md:p-12 pt-24 selection:bg-[#E94B73] selection:text-black">
+        <article className="max-w-4xl mx-auto flex flex-col gap-12 items-start mt-8">
+          <Link href="/" className="text-zinc-500 hover:text-white transition-colors flex items-center gap-2 uppercase tracking-widest text-xs font-bold mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back Home
+          </Link>
+          
+          <div className="w-full flex justify-center mb-8">
+            <div className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-[#E94B73]/20 shadow-[0_0_30px_rgba(233,75,115,0.2)]">
+              <Image
+                src={ogImage}
+                alt={`Portrait of ${characterName}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 w-full text-zinc-300 leading-relaxed space-y-8 prose prose-invert prose-pink max-w-none">
+            <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest text-white mb-6 border-b border-[#E94B73]/20 pb-4">
+              {characterName}
+            </h1>
+
+            <p className="text-xl italic border-l-4 border-[#E94B73] pl-4 py-2 bg-[#E94B73]/5 rounded-r w-fit">
+              <strong>{characterName}</strong> began as a playful internet meme and evolved into a beloved utaite-style character with a passionate fanbase. Originally created outside official Vocaloid channels, Teto's popularity grew through community creativity, fan-made voicebanks, and a distinctive personality that blends charm, mischief, and musical versatility.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Origin and History</h2>
+            <p>
+              Teto's origin story is rooted in early internet culture. She emerged from a community joke that turned into a full-fledged character with fan-produced voicebanks and artwork. Over time, Teto gained recognition alongside official Vocaloids, with producers and fans composing original songs and arranging covers that highlight her unique timbre and playful persona.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Notable Songs and Producers</h2>
+            <p>
+              Teto's catalog is eclectic, often leaning into rock, pop, and quirky experimental tracks. Producers in the doujin and indie scenes embraced her as a flexible vocal instrument. When searching for "Kasane Teto origin" or "Teto songs," you'll find a mix of fan tributes, original compositions, and collaborative projects that celebrate her grassroots beginnings.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Visual Style and Fandom</h2>
+            <p>
+              Teto is commonly depicted with short, reddish hair and a playful expression. Her visual identity varies widely because she is a community-driven character; fans reinterpret her across styles from punk to pastel kawaii. The fandom is tightly knit and creative, producing animations, comics, and live performances that keep Teto culturally active.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Community and Cultural Role</h2>
+            <p>
+              Teto represents the power of fan creation. Unlike commercially produced Vocaloids, she demonstrates how communities can invent and sustain a character through shared passion. Her presence in fan conventions and online events highlights the collaborative spirit of the Vocaloid ecosystem.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Trivia and Aliases</h2>
+            <p>
+              Teto's backstory includes playful myths and community lore. She is sometimes referenced in crossover projects and fan-made media. Because she originated as a meme, her fandom often embraces humor and meta-commentary, which fuels creative reinterpretations.
+            </p>
+
+            <h2 className="text-2xl font-bold text-white uppercase tracking-wider mt-12 mb-4">Further Listening and Links</h2>
+            <p>
+              Explore fan compilations and indie labels for standout Teto tracks. Look for community playlists that showcase her range, and follow fan hubs to discover new remixes and collaborative releases.
+            </p>
+          </div>
+
+          {/* Related Songs Block */}
+          <div className="w-full mt-16 pt-16 border-t border-white/10">
+            <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-8 text-center text-[#E94B73]">
+              Top Tracks featuring {characterName}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedSongs.map(song => (
+                <Link key={song.slug} href={`/song/${song.slug}`} className="group block">
+                  <div className="bg-zinc-900/50 rounded-xl overflow-hidden border border-white/5 transition-all duration-300 hover:border-[#E94B73]/50 hover:bg-zinc-800/80">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image 
+                        src={song.coverImage || ogImage} 
+                        alt={song.title} 
+                        fill 
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-white mb-1 group-hover:text-[#E94B73] transition-colors line-clamp-1">{song.title}</h3>
+                      <p className="text-zinc-400 text-sm font-mono mb-2">bpm {song.bpm} | {song.duration}</p>
+                      <p className="text-zinc-500 text-xs line-clamp-2">{song.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </article>
+      </main>
+    </>
+  );
+}
+
+
+================================================
+FILE: src/app/shop/page.tsx
+================================================
+﻿"use client";
+import Link from 'next/link';
+
+export default function ShopPage() {
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white font-inter-tight selection:bg-[#39C5BB] pt-24 pb-12 px-6 md:px-12 flex flex-col items-center justify-center text-center">
+      <Link href="/" className="inline-block mb-12 text-sm uppercase tracking-widest text-[#39C5BB] hover:text-white transition-colors">
+         &larr; Return Home
+      </Link>
+      <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">MERCHANDISE</h1>
+      <p className="text-zinc-400 max-w-lg mb-8 text-lg">This is a non-commercial fan-curated archive. The shop has been indefinitely suspended to preserve the purity of the project.</p>
+      <p className="text-zinc-500 text-sm">Please support official Vocaloid releases and merchandise on their respective platforms.</p>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: src/app/sitemap.xml/route.ts
+================================================
+import { mockCharacters, mockSongs } from '@/sanity/mockData';
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+
+export async function GET() {
+  const sitemap = generateSitemap();
+  return new Response(sitemap, {
+    headers: {
+      'Content-Type': 'application/xml',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  });
+}
+
+function generateSitemap(): string {
+  const pages: Array<{ url: string; lastmod?: string; changefreq?: string; priority?: number }> = [
+    // Main pages
+    { url: BASE_URL, lastmod: new Date().toISOString().split('T')[0], changefreq: 'weekly', priority: 1.0 },
+    { url: `${BASE_URL}/shop`, lastmod: new Date().toISOString().split('T')[0], changefreq: 'monthly', priority: 0.8 },
+    
+    // Character pages
+    ...mockCharacters.map(character => ({
+      url: `${BASE_URL}/character/${character.slug}`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly' as const,
+      priority: 0.9,
+    })),
+    
+    // Song pages
+    ...mockSongs.map(song => ({
+      url: `${BASE_URL}/song/${song.slug}`,
+      lastmod: song.releaseDate || new Date().toISOString().split('T')[0],
+      changefreq: 'yearly' as const,
+      priority: 0.7,
+    })),
+  ];
+
+  const xmlEntries = pages
+    .map(
+      page => `
+  <url>
+    <loc>${escapeXml(page.url)}</loc>
+    ${page.lastmod ? `<lastmod>${page.lastmod}</lastmod>` : ''}
+    ${page.changefreq ? `<changefreq>${page.changefreq}</changefreq>` : ''}
+    ${page.priority ? `<priority>${page.priority}</priority>` : ''}
+  </url>`
+    )
+    .join('');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${xmlEntries}
+</urlset>`;
+}
+
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/[<>&'"]/g, c => {
+      switch (c) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case "'": return '&apos;';
+        case '"': return '&quot;';
+        default: return c;
+      }
+    });
+}
+
+
+
+================================================
+FILE: src/app/song/[slug]/BackButton.tsx
+================================================
+"use client";
+
+import { useRouter } from 'next/navigation';
+
+export function BackButton() {
+  const router = useRouter();
+
+  const handleBack = () => {
+    // If there is history, navigate back so we maintain exact scroll position in the main stage.
+    // Fallback to home if they opened the link directly.
+    if (window.history.length > 2) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleBack}
+      className="inline-flex items-center gap-2 mb-12 text-sm uppercase tracking-widest text-[#39C5BB] hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0"
+    >
+      <span>&larr;</span> Return Base
+    </button>
+  );
+}
+
+
+================================================
+FILE: src/app/song/[slug]/page.tsx
+================================================
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Script from 'next/script';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { fetchSongBySlug, fetchRelatedSongs } from '../../../sanity/client';
+import { createSongSchema, createBreadcrumbSchema } from '@/lib/jsonld';
+import { BackButton } from './BackButton';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vocaloidportfolio.vercel.app';
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const song = await fetchSongBySlug(slug);
+
+  if (!song) return { title: 'Song Not Found' };
+
+  const songUrl = `${baseUrl}/song/${song.slug}`;
+  const ogImage = song.coverImage?.startsWith('http') ? song.coverImage : `${baseUrl}${song.coverImage}`;
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title: `${song.title} by ${song.vocaloidName}`,
+    description: song.description || `Listen to ${song.title} by ${song.vocaloidName}`,
+    keywords: [song.title, song.vocaloidName, 'Vocaloid', 'Music', 'Singing Synthesis', song.tags?.join(', ') || ''].filter(Boolean),
+    authors: [{ name: song.producer || song.vocaloidName }],
+    openGraph: {
+      type: 'music.song',
+      url: songUrl,
+      title: `${song.title} by ${song.vocaloidName}`,
+      description: song.description,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: song.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${song.title} by ${song.vocaloidName}`,
+      description: song.description,
+      images: [ogImage],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: songUrl,
+    },
+  };
+}
+
+export default async function SongPage({ params }: Props) {
+  const { slug } = await params;
+  const song = await fetchSongBySlug(slug);
+
+  if (!song) {
+    notFound();
+  }
+
+  const relatedSongs = await fetchRelatedSongs(song.vocaloidSlug, song.slug);
+
+  // Generate comprehensive JSON-LD schemas
+  const songSchema = createSongSchema(
+    song.title,
+    song.description,
+    song.vocaloidName,
+    song.coverImage,
+    baseUrl,
+    song.slug,
+    song.duration,
+    song.releaseDate
+  );
+
+  const breadcrumbSchema = createBreadcrumbSchema(
+    [
+      { name: 'Home', url: baseUrl },
+      { name: song.vocaloidName, url: `${baseUrl}/character/${song.vocaloidSlug}` },
+      { name: song.title },
+    ],
+    baseUrl
+  );
+
+  return (
+    <>
+      <Script
+        id="song-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(songSchema) }}
+      />
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <div className="min-h-screen bg-zinc-950 text-white font-inter-tight p-6 md:p-12 pt-24 selection:bg-[#39C5BB] selection:text-black">
+        <BackButton />
+        <article className="max-w-4xl mx-auto flex flex-col md:flex-row gap-12 items-start mt-8">
+          <div className="w-full md:w-1/3 relative aspect-square bg-zinc-900 rounded-2xl overflow-hidden border border-white/10 shrink-0 shadow-2xl">
+            {song.coverImage ? (
+              <Image
+                src={song.coverImage}
+                alt={song.title}
+                fill
+                className="object-cover transition-transform hover:scale-105 duration-700"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-zinc-600">No Image</div>
+            )}
+          </div>
+
+          <div className="flex-1 w-full">
+            <div className="mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest text-white mb-2">
+                {song.title}
+              </h1>
+              <Link 
+                href={`/character/${song.vocaloidSlug}`} 
+                className="text-xl text-[#39C5BB] font-mono tracking-wider hover:text-white transition-colors flex items-center gap-2 group w-fit"
+                title={`View ${song.vocaloidName} profile`}
+              >
+                // {song.vocaloidName}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </Link>
+            </div>
+
+            <p className="text-zinc-300 text-lg leading-relaxed mb-8 italic border-l-2 border-[#39C5BB] pl-4">
+              "{song.description}"
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-black/50 border border-white/5 rounded-xl p-4 transition-colors hover:bg-black/80">
+                <span className="block text-xs tracking-widest text-zinc-500 mb-1 uppercase">Producer</span>
+                <span className="font-mono text-zinc-200">{song.producer || 'Unknown'}</span>
+              </div>
+              <div className="bg-black/50 border border-white/5 rounded-xl p-4 transition-colors hover:bg-black/80">
+                <span className="block text-xs tracking-widest text-zinc-500 mb-1 uppercase">Duration</span>
+                <span className="font-mono text-zinc-300">{song.duration}</span>
+              </div>
+              <div className="bg-black/50 border border-white/5 rounded-xl p-4 transition-colors hover:bg-black/80">
+                <span className="block text-xs tracking-widest text-zinc-500 mb-1 uppercase">Origin</span>
+                <span className="font-mono text-zinc-300">{song.originalUpload || 'N/A'}</span>
+              </div>
+              <div className="bg-black/50 border border-white/5 rounded-xl p-4 transition-colors hover:bg-black/80">
+                <span className="block text-xs tracking-widest text-zinc-500 mb-1 uppercase">BPM</span>
+                <span className="font-mono text-zinc-300">{song.bpm || 'N/A'}</span>
+              </div>
+            </div>
+
+            {song.lore && (
+              <div className="mb-8 p-6 bg-zinc-900/50 border border-white/5 rounded-xl">
+                <h3 className="text-lg font-bold text-white mb-3 uppercase tracking-wider">Song Lore & History</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  {song.lore}
+                </p>
+              </div>
+            )}
+
+            {song.tags && song.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-8">
+                {song.tags.map((tag: string) => (
+                  <span key={tag} className="px-3 py-1 bg-[#39C5BB]/10 text-[#39C5BB] border border-[#39C5BB]/20 rounded-full text-xs tracking-widest uppercase">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </article>
+
+        {/* Related Songs Block */}
+        {relatedSongs && relatedSongs.length > 0 && (
+          <section className="max-w-4xl mx-auto mt-16 pt-12 border-t border-white/10">
+            <h2 className="text-2xl font-bold uppercase tracking-widest text-[#39C5BB] mb-8">
+              More by {song.vocaloidName}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedSongs.map((relatedSong: any) => (
+                <Link key={relatedSong.slug} href={`/song/${relatedSong.slug}`} className="group block">
+                  <div className="bg-zinc-900/50 rounded-xl overflow-hidden border border-white/5 transition-all duration-300 hover:border-[#39C5BB]/50 hover:bg-zinc-800/80">
+                    <div className="relative h-40 w-full overflow-hidden">
+                      <Image 
+                        src={relatedSong.coverImage || (song.coverImage?.startsWith('http') ? song.coverImage : `${baseUrl}${song.coverImage}`)} 
+                        alt={relatedSong.title} 
+                        fill 
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-white mb-1 group-hover:text-[#39C5BB] transition-colors line-clamp-1">{relatedSong.title}</h3>
+                      <p className="text-zinc-400 text-xs font-mono mb-2">bpm {relatedSong.bpm || 'N/A'} | {relatedSong.duration}</p>
+                      <p className="text-zinc-500 text-xs line-clamp-2">{relatedSong.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
+
+
+================================================
+FILE: src/app/song/[slug]/SongClientEmbed.tsx
+================================================
+"use client";
+
+import { YouTubeEmbed } from '../../../components/YouTubeEmbed';
+
+type Props = {
+  embedUrl: string;
+  title: string;
+  slug: string;
+};
+
+export function SongClientEmbed({ embedUrl, title, slug }: Props) {
+  return (
+    <div className="mt-8 border-t border-white/10 pt-8 flex flex-col gap-4">
+      <h3 className="text-sm uppercase tracking-widest text-zinc-500">Official Video Record</h3>
+      
+      <YouTubeEmbed 
+        url={embedUrl}
+        title={title}
+      />
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: src/components/AudioVisualizerCanvas.tsx
+================================================
+"use client";
+import { useEffect, useRef, memo } from 'react';
+import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
+
+export interface AudioVisualizerCanvasProps {
+  analyserNode: AnalyserNode | null;
+  activeCharacterName: string;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  baseX: number;
+  baseY: number;
+  radius: number;
+  color: string;
+}
+
+const AudioVisualizerCanvasBase = ({
+  analyserNode,
+  activeCharacterName,
+}: AudioVisualizerCanvasProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number>(0);
+  const particlesRef = useRef<Particle[]>([]);
+
+  // Character flags
+  const isMiku = activeCharacterName.toLowerCase().includes('miku');
+  const isTeto = activeCharacterName.toLowerCase().includes('teto');
+  const isNeru = activeCharacterName.toLowerCase().includes('neru');
+  const { isLowEnd } = usePerformanceMonitor();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Handle high-DPI scaling
+    const setCanvasSize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      ctx.scale(dpr, dpr);
+      
+      // Re-initialize particles for Teto on resize
+      if (isTeto) {
+        initParticles(rect.width, rect.height);
+      }
+    };
+
+    const initParticles = (width: number, height: number) => {
+      const p: Particle[] = [];
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      const tetoParticleCount = isLowEnd ? 40 : 150;
+      for (let i = 0; i < tetoParticleCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 50 + 20;
+        p.push({
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius,
+          baseX: centerX + Math.cos(angle) * radius,
+          baseY: centerY + Math.sin(angle) * radius,
+          vx: 0,
+          vy: 0,
+          radius: Math.random() * 3 + 1,
+          color: `rgba(220, 38, 38, ${Math.random() * 0.5 + 0.3})` // Red shades for Teto
+        });
+      }
+      particlesRef.current = p;
+    };
+
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
+
+    // Audio data arrays
+    const bufferLength = analyserNode ? analyserNode.frequencyBinCount : 0;
+    const dataArray = analyserNode ? new Uint8Array(bufferLength) : new Uint8Array(0);
+
+    const renderLoop = () => {
+      if (!ctx || !canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+
+      if (analyserNode && bufferLength > 0) {
+        analyserNode.getByteFrequencyData(dataArray);
+      } else {
+        // Fallback fake data if no audio node is connected
+        for (let i = 0; i < dataArray.length; i++) {
+          dataArray[i] = dataArray[i] > 5 ? dataArray[i] * 0.9 : 0;
+        }
+      }
+
+      // ----------------------------------------------------------------
+      // MIKU: Sleek, fluid Bezier curves (Oscilloscope style)
+      // ----------------------------------------------------------------
+      if (isMiku) {
+        ctx.beginPath();
+        // Removed sliceWidth as it's no longer used
+        let x = 0;
+
+        // Focus on mid-tones (e.g., bins between 20% and 60% of frequency array)
+        const midStart = Math.floor(bufferLength * 0.2);
+        const midEnd = Math.floor(bufferLength * 0.6);
+        const midLength = midEnd - midStart;
+        const midSliceWidth = width / midLength;
+
+        // Draw multiple overlapping curves with different opacities
+        for (let layer = 0; layer < 3; layer++) {
+          ctx.beginPath();
+          x = 0;
+          
+          for (let i = midStart; i < midEnd; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = (v * height) / 2 + (layer * 20);
+
+            if (i === midStart) {
+              ctx.moveTo(x, y);
+            } else {
+              // Smooth bezier curve approximations
+              const xc = (x + x + midSliceWidth) / 2;
+              const yc = (y + y) / 2;
+              ctx.quadraticCurveTo(x, y, xc, yc);
+            }
+            x += midSliceWidth;
+          }
+          
+          ctx.strokeStyle = `rgba(57, 197, 187, ${0.8 - (layer * 0.2)})`; // Miku Teal
+          ctx.lineWidth = 3 - layer;
+          ctx.stroke();
+        }
+      }
+
+      // ----------------------------------------------------------------
+      // TETO: Aggressive, center-out particle burst for bass hits
+      // ----------------------------------------------------------------
+      else if (isTeto) {
+        // Calculate bass average (first 10 bins roughly)
+        let bassSum = 0;
+        for (let i = 0; i < 10; i++) {
+          bassSum += dataArray[i] || 0;
+        }
+        const bassAvg = bassSum / 10;
+        const isKick = bassAvg > 210; // Threshold for a bass hit
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        particlesRef.current.forEach((p) => {
+          // If kick drum hits, add violent velocity outward
+          if (isKick) {
+            const angle = Math.atan2(p.y - centerY, p.x - centerX);
+            const force = (bassAvg / 255) * 15; // Explosive force
+            p.vx += Math.cos(angle) * force * Math.random();
+            p.vy += Math.sin(angle) * force * Math.random();
+          }
+
+          // Apply velocity
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // Friction to slow them down
+          p.vx *= 0.85;
+          p.vy *= 0.85;
+
+          // Spring force to pull them back to their base positions
+          const dxBase = p.baseX - p.x;
+          const dyBase = p.baseY - p.y;
+          p.vx += dxBase * 0.05;
+          p.vy += dyBase * 0.05;
+
+          // Draw particle
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * (1 + bassAvg / 255), 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        
+        // Central glow core
+        const coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, bassAvg);
+        coreGradient.addColorStop(0, 'rgba(220, 38, 38, 0.8)');
+        coreGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, bassAvg, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ----------------------------------------------------------------
+      // NERU: Retro 90s Blocky Spectrum + Terminal Glitch on Treble
+      // ----------------------------------------------------------------
+      else if (isNeru) {
+        // Calculate treble average (high frequencies)
+        let trebleSum = 0;
+        const trebleStart = Math.floor(bufferLength * 0.7);
+        for (let i = trebleStart; i < bufferLength; i++) {
+          trebleSum += dataArray[i] || 0;
+        }
+        const trebleAvg = trebleSum / (bufferLength - trebleStart);
+        const isClipping = trebleAvg > 100;
+
+        ctx.save();
+
+        // Apply Glitch rule: random X offset
+        if (isClipping) {
+          const glitchX = (Math.random() * 20) - 10;
+          ctx.translate(glitchX, 0);
+        }
+
+        const barWidth = 15;
+        const gap = 4;
+        const totalBars = Math.floor(width / (barWidth + gap));
+        const step = Math.floor(bufferLength / totalBars);
+
+        for (let i = 0; i < totalBars; i++) {
+          // Average the chunk of frequencies for this bar
+          let chunkSum = 0;
+          for (let j = 0; j < step; j++) {
+            chunkSum += dataArray[(i * step) + j] || 0;
+          }
+          const chunkAvg = chunkSum / step;
+          const barHeight = (chunkAvg / 255) * height * 0.8;
+
+          const x = i * (barWidth + gap);
+
+          // Draw blocky equalizer (broken into stacked squares)
+          const segments = Math.floor(barHeight / 10);
+          for(let s = 0; s < segments; s++) {
+            // Yellow / Orange gradient
+            const r = 255;
+            const g = 215 - (s * 5); // Shifts to orange at top
+            ctx.fillStyle = `rgba(${r}, ${g}, 0, 0.8)`;
+            
+            // Draw individual blocks, slightly spaced
+            ctx.fillRect(x, height - (s * 12) - 10, barWidth, 8);
+          }
+        }
+
+        ctx.restore();
+      }
+
+      animationFrameRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    renderLoop();
+
+    return () => {
+      window.removeEventListener('resize', setCanvasSize);
+      cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, [analyserNode, activeCharacterName, isMiku, isTeto, isNeru]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none mix-blend-screen opacity-50 z-0"
+      aria-hidden="true"
+    />
+  );
+};
+
+export const AudioVisualizerCanvas = memo(AudioVisualizerCanvasBase, (prev, next) => {
+  return prev.activeCharacterName === next.activeCharacterName && prev.analyserNode === next.analyserNode;
+});
+
+
+
+
+================================================
+FILE: src/components/CharacterHero.tsx
+================================================
+"use client";
+import { memo, useState, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import { motion, useMotionValue, useTransform } from 'motion/react';
+import type { Vocaloid } from '../config/vocaloidData';
+
+interface CharacterHeroProps {
+  characterData: Vocaloid;
+  alignment: 'left' | 'right';
+  onClick?: () => void;
+}
+
+function CharacterHeroBase({ characterData, alignment, onClick }: CharacterHeroProps) {
+  const [triggerGlitch, setTriggerGlitch] = useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
+  
+  // Glitch animation triggers every 20 seconds
+  useEffect(() => {
+    const glitchInterval = setInterval(() => {
+      setTriggerGlitch(true);
+      setTimeout(() => setTriggerGlitch(false), 150);
+    }, 20000);
+    
+    return () => clearInterval(glitchInterval);
+  }, []);
+  
+  // Spotlight logic
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  };
+  
+  const maskImage = useTransform(
+    [mouseX, mouseY],
+    ([x, y]) => `radial-gradient(400px circle at ${x}px ${y}px, black 20%, transparent 80%)`
+  );
+
+  const handleClick = () => {
+    setIsPulsing(true);
+    setTimeout(() => {
+      setIsPulsing(false);
+      onClick?.();
+    }, 400); // 400ms pulse
+  };
+
+  const nameParts = characterData.name.split(' ');
+  const firstName = nameParts[0];
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+  return (
+    <div
+      className={`flex items-center justify-center w-full mx-auto h-full gap-8 md:gap-16 flex-col md:flex-row ${
+        alignment === 'right' ? 'md:flex-row-reverse' : ''
+      }`}
+    >
+      {/* Interactive Image Container */}
+      <div
+        className="relative flex-1 cursor-pointer group flex justify-center items-center h-[50%] md:h-full w-full"
+        onMouseMove={handleMouseMove}
+        onClick={handleClick}
+      >
+        <motion.div
+          animate={{
+            y: [-15, 15],
+            scale: isPulsing ? [1, 1.2, 1] : 1
+          }}
+          transition={{
+            y: {
+              duration: 3,
+              repeat: Infinity,
+              repeatType: 'mirror',
+              ease: 'easeInOut'
+            },
+            scale: {
+              duration: 0.4
+            }
+          }}
+          whileHover={{ scale: 1.05 }}
+          className="relative w-[75vw] h-[45vh] md:w-[480px] md:h-[700px] max-w-[380px] md:max-w-none rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-zinc-800/30"
+          style={{
+            boxShadow: `0 0 80px ${characterData.colors.primary}30`
+          }}
+        >
+          {/* Spotlight overlay effect */}
+          <motion.div
+            className="absolute inset-0 z-20 pointer-events-none opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hidden md:block"
+            style={{
+              background: `${characterData.colors.primary}60`,
+              WebkitMaskImage: maskImage,
+              maskImage: maskImage
+            }}
+          />
+
+          <img
+            src={characterData.baseImage}
+            alt={`${characterData.name}`}
+            className={`w-full h-full object-center relative z-10 transition-transform duration-700 group-hover:scale-105 pointer-events-none object-contain ${
+              characterData.name.includes("Teto") ? "scale-90" : "scale-[0.85]"
+            }`}
+            draggable="false"
+          />
+        </motion.div>
+      </div>
+
+      {/* Typography */}
+      <div className="flex-1 flex flex-col justify-center translate-y-0 md:translate-y-[-5%] px-4 sm:px-8 md:px-12 text-center md:text-left mt-2 md:mt-0 w-full items-center md:items-start">
+        <div className="relative inline-block text-left">
+          <motion.h2
+            className="text-[64px] sm:text-[90px] md:text-[160px] font-black uppercase tracking-tighter leading-[0.85] font-inter-tight relative z-10"
+            style={{ color: characterData.colors.primary }}
+            initial={{ opacity: 0, x: alignment === 'left' ? 50 : -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            {firstName}
+            <br />
+            <span 
+              className="text-transparent" 
+              style={{ WebkitTextStroke: `3px ${characterData.colors.primary}` }}
+            >
+              {lastName}
+            </span>
+          </motion.h2>
+          
+          {/* RGB Split Glitch Layers */}
+          {triggerGlitch && (
+            <>
+              <motion.div
+                className="absolute top-0 left-0 text-[64px] sm:text-[90px] md:text-[160px] font-black uppercase tracking-tighter leading-[0.85] font-inter-tight"
+                style={{ color: '#FF0000', opacity: 0.8, zIndex: 11 }}
+                initial={{ x: -4, y: -4 }}
+                animate={{ x: 0, y: 0 }}
+                transition={{ duration: 0.05 }}
+              >
+                {firstName}
+                <br />
+                <span style={{ WebkitTextStroke: `3px #FF0000` }}>
+                  {lastName}
+                </span>
+              </motion.div>
+
+              <motion.div
+                className="absolute top-0 left-0 text-[64px] sm:text-[90px] md:text-[160px] font-black uppercase tracking-tighter leading-[0.85] font-inter-tight"
+                style={{ color: '#0000FF', opacity: 0.8, zIndex: 12 }}
+                initial={{ x: 4, y: 4 }}
+                animate={{ x: 0, y: 0 }}
+                transition={{ duration: 0.05 }}
+              >
+                {firstName}
+                <br />
+                <span style={{ WebkitTextStroke: `3px #0000FF` }}>
+                  {lastName}
+                </span>
+              </motion.div>
+            </>
+          )}
+        </div>
+
+        {/* Tagline / Subtitle */}
+        <motion.p
+          className="mt-4 md:mt-8 text-lg sm:text-2xl md:text-3xl font-medium tracking-[0.3em] uppercase text-white/70"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+        >
+          {characterData.tagline}
+        </motion.p>
+      </div>
+    </div>
+  );
+}
+
+export const CharacterHero = memo(CharacterHeroBase, (prev, next) => {
+  return prev.characterData.name === next.characterData.name && prev.alignment === next.alignment;
+});
+
+
+
+================================================
+FILE: src/components/CharacterTabs.tsx
+================================================
+"use client";
+import { useMemo, useState, memo } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import Link from 'next/link';
+import type { Vocaloid } from '../config/vocaloidData';
+
+import { ECGMonitor } from './ECGMonitor';
+
+type TabKey = 'autobiography' | 'influences' | 'song-stats' | 'core-stats';
+
+type TabConfig = {
+  key: TabKey;
+  label: string;
+};
+
+const TABS: TabConfig[] = [
+  { key: 'autobiography', label: 'About' },
+  { key: 'core-stats', label: 'Stats' },
+  { key: 'influences', label: 'Influence' },
+  { key: 'song-stats', label: 'Top Songs' },
+];
+
+type CharacterTabsProps = {
+  characterData: Vocaloid;
+};
+
+function formatPlayCount(count: number): string {
+  return new Intl.NumberFormat('en-US').format(count);
+}
+
+function CharacterTabsBase({ characterData }: CharacterTabsProps) {
+  const [activeTab, setActiveTab] = useState<TabKey>('autobiography');
+
+  const maxPlayCount = useMemo(() => {
+    const values = characterData.songs.map((song) => song.playCount);
+    return Math.max(...values, 1);
+  }, [characterData.songs]);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
+      <div className="relative flex flex-wrap items-center justify-center gap-x-4 md:gap-x-12 gap-y-4 md:gap-y-6 border-b border-white/15 pb-4 w-full px-2">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className="relative pb-2 text-[11px] sm:text-lg md:text-2xl font-bold uppercase tracking-[0.16em] transition-colors duration-200"
+              style={{
+                color: isActive ? 'var(--primary-color)' : '#d4d4d8',
+              }}
+            >
+              {tab.label}
+              {isActive && (
+                <motion.span
+                  layoutId="character-tabs-underline"
+                  className="absolute -bottom-[17px] left-0 h-[3px] w-full rounded-full"
+                  style={{
+                    backgroundColor: 'var(--primary-color)',
+                    boxShadow: 'var(--custom-box-shadow)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 560, damping: 45 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.24, ease: 'easeOut' }}
+          className="pt-6 md:pt-12 w-full flex justify-center text-center max-h-[60dvh] md:max-h-[60dvh] overflow-y-auto no-scrollbar pb-12 md:pb-4"
+        >
+          {activeTab === 'autobiography' && (
+            <div className="flex flex-col items-center gap-4 md:gap-6 px-4">
+              <p className="text-sm md:text-2xl tracking-[0.2em] font-medium uppercase font-inter-tight" style={{ color: characterData.colors.primary }}>       
+                {characterData.loreMetric}
+              </p>
+              <p className="text-base md:text-3xl leading-relaxed text-zinc-200 max-w-3xl font-light">{characterData.bio}</p>
+            </div>
+          )}
+
+          {activeTab === 'core-stats' && (
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-8 w-full max-w-3xl">
+              <div className="flex flex-col items-center p-3 md:p-6 border border-white/10 rounded-xl md:rounded-2xl bg-black/20 backdrop-blur-sm">
+                <span className="text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-zinc-500 mb-1 md:mb-2">Age</span>
+                <span className="text-xl md:text-4xl font-bold font-inter-tight" style={{ color: characterData.colors.primary }}>
+                  {characterData.stats.age}
+                </span>
+              </div>
+              <div className="flex flex-col items-center p-3 md:p-6 border border-white/10 rounded-xl md:rounded-2xl bg-black/20 backdrop-blur-sm">
+                <span className="text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-zinc-500 mb-1 md:mb-2">Height</span>
+                <span className="text-xl md:text-4xl font-bold font-inter-tight" style={{ color: characterData.colors.primary }}>
+                  {characterData.stats.height}
+                </span>
+              </div>
+              <div className="flex flex-col items-center p-3 md:p-6 border border-white/10 rounded-xl md:rounded-2xl bg-black/20 backdrop-blur-sm">
+                <span className="text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-zinc-500 mb-1 md:mb-2">Weight</span>
+                <span className="text-xl md:text-4xl font-bold font-inter-tight" style={{ color: characterData.colors.primary }}>
+                  {characterData.stats.weight}
+                </span>
+              </div>
+              <div className="col-span-3 md:col-span-3 flex flex-col items-center p-4 md:p-6 border border-white/10 rounded-xl md:rounded-2xl bg-black/20 backdrop-blur-sm mt-0 md:mt-4">
+                <span className="text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-zinc-500 mb-1 md:mb-2">System Status</span>
+                <span className="text-lg md:text-2xl font-bold font-inter-tight tracking-wider" style={{ color: characterData.colors.primary }}>
+                  [{characterData.modelStatus}]
+                </span>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'influences' && (
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              {characterData.influences.map((influence) => (
+                <span
+                  key={influence}
+                  className="rounded-full border-2 px-6 py-3 md:px-8 md:py-4 text-sm md:text-xl font-bold uppercase tracking-[0.18em]"
+                  style={{
+                    borderColor: 'var(--primary-color)',
+                    color: 'var(--primary-color)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                    boxShadow: 'var(--custom-box-shadow)',
+                  }}
+                >
+                  {influence}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'song-stats' && (
+            <ul data-song-list="true" className="space-y-4 md:space-y-8 w-full max-w-2xl text-left px-4">
+              {characterData.songs.map((song, index) => {
+                const rawPercent = (song.playCount / maxPlayCount) * 100;
+                const popularityPercent = Math.max(12, Math.min(100, rawPercent));
+
+                return (
+                  <li key={`${song.title}-${song.year}`} className="space-y-4">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 md:gap-4 border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-3">
+                        {song.slug ? (
+                          <Link href={`/song/${song.slug}`} className="text-lg md:text-2xl font-bold text-zinc-100 uppercase tracking-wider hover:text-[#39C5BB] transition-colors decoration-[#39C5BB] underline-offset-4 hover:underline">
+                            {song.title}
+                          </Link>
+                        ) : (
+                          <p className="text-lg md:text-2xl font-bold text-zinc-100 uppercase tracking-wider">
+                            {song.title}
+                          </p>
+                        )}
+                        <span className="text-sm md:text-lg text-zinc-500 font-normal">({song.year})</span>
+                      </div>
+                      <p className="text-base md:text-xl font-medium text-zinc-300">
+                        {formatPlayCount(song.playCount)} <span className="text-xs md:text-sm text-zinc-500 uppercase">plays</span>
+                      </p>
+                    </div>
+
+                    <div className="h-6 w-full relative overflow-hidden rounded-full bg-black/40 border border-white/5">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${popularityPercent}%` }}
+                        transition={{ duration: 1.2, delay: index * 0.1, ease: 'easeOut' }}
+                        className="h-full absolute left-0 top-0 overflow-hidden"
+                      >
+                        <ECGMonitor
+                          theme={characterData.theme}
+                          color={characterData.colors.primary}
+                          width="1000px"
+                          height="24px"
+                        />
+                      </motion.div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export const CharacterTabs = memo(CharacterTabsBase, (prev, next) => {
+  return prev.characterData.name === next.characterData.name;
+});
+
+
+
+
+================================================
+FILE: src/components/CustomCursor.tsx
+================================================
+"use client";
+import { memo, useEffect, useMemo, useState } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { vocaloidData } from '../config/vocaloidData';
+import { useVibe } from '../contexts/VibeProvider';
+import type { CharacterTheme } from '../constants/theme';
+
+type CharacterColorMap = Record<CharacterTheme, string>;
+
+const SPRING_CONFIG = {
+  stiffness: 800,
+  damping: 28,
+  mass: 0.1,
+};
+
+const CURSOR_HIDE_POSITION = -120;
+
+function resolveThemeByName(name: string): CharacterTheme {
+  const normalized = name.toLowerCase();
+  if (normalized.includes('miku')) {
+    return 'miku';
+  }
+
+  if (normalized.includes('teto')) {
+    return 'teto';
+  }
+
+  return 'neru';
+}
+
+function CustomCursorBase() {
+  const { activeCharacter } = useVibe();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isRecordHover, setIsRecordHover] = useState(false);
+  const [isFinePointer, setIsFinePointer] = useState(false);
+
+  const mouseX = useMotionValue(CURSOR_HIDE_POSITION);
+  const mouseY = useMotionValue(CURSOR_HIDE_POSITION);
+  const springX = useSpring(mouseX, SPRING_CONFIG);
+  const springY = useSpring(mouseY, SPRING_CONFIG);
+
+  const colorsByCharacter = useMemo<CharacterColorMap>(() => {
+    const initial: CharacterColorMap = {
+      miku: '#39C5BB',
+      teto: '#C33149',
+      neru: '#FFD700',
+    };
+
+    for (const character of vocaloidData) {
+      initial[resolveThemeByName(character.name)] = character.colors.primary;
+    }
+
+    return initial;
+  }, []);
+
+  const activeColor = colorsByCharacter[activeCharacter];
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(pointer: fine)');
+    const updatePointerMode = () => {
+      setIsFinePointer(mediaQuery.matches);
+    };
+
+    updatePointerMode();
+    mediaQuery.addEventListener('change', updatePointerMode);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updatePointerMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isFinePointer) {
+      return;
+    }
+
+    const previousHtmlCursor = document.documentElement.style.cursor;
+    const previousBodyCursor = document.body.style.cursor;
+
+    document.documentElement.style.cursor = 'none';
+    document.body.style.cursor = 'none';
+    document.body.classList.add('hide-cursor');
+
+    const handleMouseMove = (event: MouseEvent) => {
+      mouseX.set(event.clientX);
+      mouseY.set(event.clientY);
+      setIsVisible(true);
+
+      const targetElement = event.target as Element | null;
+      const hoveringRecord = Boolean(targetElement?.closest('[data-cursor="record"]'));
+      setIsRecordHover((previous) => {
+        if (previous === hoveringRecord) {
+          return previous;
+        }
+
+        return hoveringRecord;
+      });
+    };
+
+    const handleMouseOutWindow = (event: MouseEvent) => {
+      if (event.relatedTarget !== null) {
+        return;
+      }
+
+      setIsVisible(false);
+    };
+
+    const handleWindowBlur = () => {
+      setIsVisible(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mouseout', handleMouseOutWindow);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseout', handleMouseOutWindow);
+      window.removeEventListener('blur', handleWindowBlur);
+      document.documentElement.style.cursor = previousHtmlCursor;
+      document.body.style.cursor = previousBodyCursor;
+      document.body.classList.remove('hide-cursor');
+    };
+  }, [isFinePointer, mouseX, mouseY]);
+
+  if (!isFinePointer) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      className="pointer-events-none fixed left-0 top-0"
+      style={{
+        x: springX,
+        y: springY,
+        translateX: '-50%',
+        translateY: '-50%',
+        zIndex: 99999,
+        opacity: isVisible ? 1 : 0,
+      }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="relative flex items-center justify-center rounded-full"
+        animate={{
+          scale: isRecordHover ? 1.4 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+        style={{
+          width: isRecordHover ? 48 : 28,
+          height: isRecordHover ? 48 : 28,
+          border: isRecordHover ? `2px solid transparent` : `2px solid ${activeColor}`,
+          background: isRecordHover ? 'transparent' : 'rgba(8, 8, 8, 0.35)',
+          boxShadow: isRecordHover ? 'none' : `0 0 20px ${activeColor}88`,
+        }}
+      >
+        {isRecordHover ? (
+          <motion.svg
+            viewBox="0 0 48 48"
+            className="absolute inset-0 w-full h-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            {/* Outer Record Grooves */}
+            <circle cx="24" cy="24" r="23" fill="#1a1a1a" stroke="#2a2a2a" strokeWidth="1" />
+            <circle cx="24" cy="24" r="18" fill="none" stroke="#222" strokeWidth="0.5" />
+            <circle cx="24" cy="24" r="14" fill="none" stroke="#222" strokeWidth="0.5" />
+            
+            {/* Inner Label colored by Character Theme */}
+            <circle cx="24" cy="24" r="9" fill={activeColor} />
+            
+            {/* Record Hole */}
+            <circle cx="24" cy="24" r="2" fill="#000" />
+            
+            {/* Shine effect */}
+            <path d="M 4 24 A 20 20 0 0 1 10 10" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 44 24 A 20 20 0 0 1 38 38" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" strokeLinecap="round" />
+          </motion.svg>
+        ) : (
+          <div
+            className="absolute left-1/2 top-1/2 h-[6px] w-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ backgroundColor: activeColor }}
+          />
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export const CustomCursor = memo(CustomCursorBase);
+
+
+
+
+================================================
+FILE: src/components/ECGMonitor.tsx
+================================================
+"use client";
+import { memo } from 'react';
+import { motion } from 'motion/react';
+import type { CharacterTheme } from '../constants/theme';
+
+interface ECGMonitorProps {
+  theme: CharacterTheme | 'default';
+  color?: string;
+  width?: string;
+  height?: string;
+}
+
+// Basic Lead II Waveforms mapped to an internal 0-100 ViewBox.
+const NSR_PATH = "M 0 50 L 10 50 Q 15 45 20 50 L 30 50 L 35 40 L 40 10 L 45 70 L 50 50 L 60 50 L 70 50 Q 80 35 90 50 L 100 50";
+const TACHY_PATH = "M 0 50 L 10 50 Q 12 45 15 50 L 18 50 L 20 40 L 25 10 L 30 70 L 35 50 L 40 50 Q 45 35 50 50 L 55 50 Q 57 45 60 50 L 62 50 L 65 40 L 70 10 L 75 70 L 80 50 L 85 50 Q 90 35 95 50 L 100 50";
+const BRADY_PATH = "M 0 50 L 30 50 Q 35 45 40 50 L 45 50 L 50 40 L 55 10 L 60 70 L 65 50 L 75 50 L 100 50";
+
+function ECGMonitorBase({ theme, color = 'var(--primary-color)', width = '100%', height = '60px' }: ECGMonitorProps) {
+  let path = NSR_PATH;
+  let duration = 1.2;
+
+  if (theme === 'teto') {
+    path = TACHY_PATH;
+    duration = 0.6; // High energy
+  } else if (theme === 'neru') {
+    path = BRADY_PATH;
+    duration = 2.0; // Slow, bored rhythm
+  } else if (theme === 'default') {
+    color = '#FFFFFF';
+  }
+
+  return (
+    <div className="relative overflow-hidden flex items-center" style={{ width, height }}>
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="absolute top-0 left-0 w-full h-full opacity-80"
+        style={{
+          WebkitMaskImage: `linear-gradient(to right, transparent, black 10%, black 90%, transparent)`,
+          maskImage: `linear-gradient(to right, transparent, black 10%, black 90%, transparent)`
+        }}
+      >
+        <defs>
+          <pattern id={`ecg-pattern-${theme}`} x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+             <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </pattern>
+        </defs>
+
+        {/* We make the rect very wide and animate its X to simulate continuous scrolling */}
+        <motion.rect
+          x="0" y="0" width="500%" height="100"
+          fill={`url(#ecg-pattern-${theme})`}
+          animate={{ x: [0, -100] }}
+          transition={{ duration, repeat: Infinity, ease: 'linear' }}
+        />
+      </svg>
+
+      {/* Occasional artifacting (glitch) on Neru simulating a bad connection or interference */}
+      {theme === 'neru' && (
+        <motion.div
+          className="absolute inset-0 bg-white/20 mix-blend-overlay"
+          animate={{ opacity: [0, 0.8, 0, 1, 0, 0] }}
+          transition={{ duration: 4, repeat: Infinity, times: [0, 0.05, 0.1, 0.15, 0.2, 1] }}
+        />
+      )}
+    </div>
+  );
+}
+
+export const ECGMonitor = memo(ECGMonitorBase);
+
+
+================================================
+FILE: src/components/LoadingScreen.tsx
+================================================
+"use client";
+import { useEffect, useState, memo } from 'react';
+import { motion } from 'motion/react';
+
+interface LoadingScreenProps {
+  onLoadComplete: () => Promise<void> | void;
+  onStartExperience: () => Promise<void>;
+}
+
+const ASSETS_TO_LOAD = [
+  // Placeholder assets for testing - these will fail to load but won't block the UI
+  { type: 'placeholder', name: 'Miku Asset', src: '#' },
+  { type: 'placeholder', name: 'Teto Asset', src: '#' },
+  { type: 'placeholder', name: 'Neru Asset', src: '#' },
+];
+
+function LoadingScreenBase({ onLoadComplete, onStartExperience }: LoadingScreenProps) {
+  const [loadedAssets, setLoadedAssets] = useState<Set<string>>(new Set());
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const totalAssets = ASSETS_TO_LOAD.length;
+  const loadedCount = loadedAssets.size;
+  const progressPercent = (loadedCount / totalAssets) * 100;
+  const isComplete = loadedCount === totalAssets;
+
+  // Load assets on mount
+  useEffect(() => {
+    const loadAsset = async (asset: typeof ASSETS_TO_LOAD[0]) => {
+      const assetId = `${asset.type}-${asset.name}`;
+      
+      try {
+        if (asset.type === 'placeholder') {
+          // Placeholder assets load immediately
+          setLoadedAssets((prev) => new Set([...prev, assetId]));
+        } else if (asset.type === 'image') {
+          const img = new Image();
+          img.src = asset.src;
+          
+          return new Promise<void>((resolve) => {
+            img.onload = () => {
+              setLoadedAssets((prev) => new Set([...prev, assetId]));
+              resolve();
+            };
+            img.onerror = () => {
+              // Gracefully handle missing images
+              setLoadedAssets((prev) => new Set([...prev, assetId]));
+              resolve();
+            };
+          });
+        } else {
+          // Audio loading is delegated to the audio hook
+          // For now, mark as loaded after a simulated fetch
+          const response = await fetch(asset.src);
+          if (response.ok) {
+            setLoadedAssets((prev) => new Set([...prev, assetId]));
+          } else {
+            // Gracefully handle missing audio files
+            setLoadedAssets((prev) => new Set([...prev, assetId]));
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to load ${asset.type}: ${asset.name}`);
+        // Mark as loaded anyway to not block the UI indefinitely
+        setLoadedAssets((prev) => new Set([...prev, assetId]));
+      }
+    };
+
+    // Load all assets in parallel
+    Promise.all(ASSETS_TO_LOAD.map(loadAsset));
+  }, []);
+
+  const handleStartExperience = async () => {
+    if (!isComplete) return;
+    
+    setHasStarted(true);
+    try {
+      await onStartExperience();
+      // Call onLoadComplete after audio context is ready
+      await Promise.resolve(onLoadComplete());
+    } catch (error) {
+      console.error('Failed to start experience:', error);
+      setHasStarted(false);
+    }
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      initial={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      exit={{ opacity: 0, filter: 'blur(20px)', scale: 1.1 }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="flex flex-col items-center gap-10 px-4 w-full max-w-2xl">
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center"
+        >
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-white/90 font-inter-tight mb-2 opacity-50 blur-[1px]">
+            Vocaloid
+          </h1>
+          <p className="text-sm md:text-base font-medium tracking-[0.3em] uppercase text-zinc-500">
+            System Initialization
+          </p>
+        </motion.div>
+
+        {/* Minimal Progress Bar with Glowing Neon Shadow */}
+        <div className="w-full space-y-6">
+          <div className="relative h-12 w-full bg-black border border-[#39C5BB]/20 rounded-md overflow-hidden flex items-center shadow-[0_0_15px_rgba(57,197,187,0.15)]">
+            <motion.div
+              className="absolute left-0 top-0 h-full overflow-hidden flex items-center bg-[#39C5BB]/20"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            >
+               <div className="absolute top-0 right-0 w-[4px] h-full bg-[#39C5BB] blur-[2px] opacity-80 shadow-[0_0_10px_#39C5BB]" />
+            </motion.div>
+          </div>
+          
+          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-[0.2em]">
+            <motion.span 
+              className="text-zinc-600"
+              animate={{ opacity: isComplete ? 1 : 0.5 }}
+            >
+              Assets Loaded
+            </motion.span>
+            <motion.span 
+              className="text-[#39C5BB]"
+              style={{ textShadow: '0 0 10px #39C5BB' }}
+            >
+              {Math.round(progressPercent)}%
+            </motion.span>
+          </div>
+        </div>
+
+        {/* Start Button */}
+        <motion.button
+          onClick={handleStartExperience}
+          disabled={!isComplete || hasStarted}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: isComplete ? 1 : 0, y: isComplete ? 0 : 10 }}
+          transition={{ duration: 0.6, delay: isComplete ? 0.2 : 0 }}
+          whileHover={isComplete && !hasStarted ? { scale: 1.05 } : {}}
+          whileTap={isComplete && !hasStarted ? { scale: 0.98 } : {}}
+          className="relative mt-8 px-12 py-4 rounded-none font-bold uppercase tracking-[0.3em] text-sm transition-all duration-500 overflow-hidden group"
+          style={{
+            color: isComplete ? '#fff' : '#3f3f46',
+            border: isComplete ? '1px solid rgba(57,197,187,0.5)' : '1px solid rgba(63,63,70,0.5)',
+            cursor: isComplete && !hasStarted ? 'pointer' : 'not-allowed',
+          }}
+        >
+          {/* Hover glow background */}
+          {isComplete && (
+            <div className="absolute inset-0 bg-[#39C5BB]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          )}
+          
+          <span className="relative z-10">
+            {hasStarted ? 'Unlocking...' : 'Start Experience'}
+          </span>
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
+
+export const LoadingScreen = memo(LoadingScreenBase);
+
+
+
+
+================================================
+FILE: src/components/MainStage.tsx
+================================================
+"use client";
+import { useEffect, useRef } from 'react';
+import { useInView } from 'motion/react';
+import { vocaloidData } from '../config/vocaloidData';
+import type { Vocaloid } from '../config/vocaloidData';
+import { CharacterHero } from './CharacterHero';
+import { useVibe } from '../contexts/VibeProvider';
+import type { CharacterTheme } from '../constants/theme';
+import type { VocaloidTrackName } from '../hooks/useVocaloidAudio';
+import { AudioVisualizerCanvas } from './AudioVisualizerCanvas';
+
+import { CharacterTabs } from './CharacterTabs';
+
+const CHARACTER_TO_TRACK: Record<CharacterTheme, VocaloidTrackName> = {
+  miku: 'World is Mine',
+  teto: 'Kasane Territory',
+  neru: 'Stop Nagging Me',
+};
+
+interface SectionProps {
+  data: Vocaloid;
+  index: number;
+  total: number;
+  isActive: boolean;
+  analyserNode: AnalyserNode | null;
+  onActivate: (theme: CharacterTheme) => void;
+  onNext: () => void;
+  setMuffleEffect: (isMuffled: boolean) => void;
+}
+
+function CharacterSection({ data, index, total, isActive, analyserNode, onActivate, onNext, setMuffleEffect }: SectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { amount: 0.2 }); // Trigger when 20% of the full 200vh section is visible (which is ~40vh)
+  const isTabsInView = useInView(tabsRef, { amount: 0.4 });
+
+  const themeKey = data.name.toLowerCase().includes('miku') ? 'miku' :
+                   data.name.toLowerCase().includes('teto') ? 'teto' : 'neru';  
+
+  useEffect(() => {
+    if (isInView) {
+      onActivate(themeKey as CharacterTheme);
+    }
+  }, [isInView, onActivate, themeKey]);
+
+  useEffect(() => {
+    if (isActive) {
+      setMuffleEffect(isTabsInView);
+    }
+  }, [isActive, isTabsInView, setMuffleEffect]);
+
+  return (
+    <section ref={sectionRef} id={`character-${index}`} className="relative flex flex-col w-full min-h-[200dvh]">
+      {/* Screen 1: Hero Profile */}
+      <div
+        className="h-[100dvh] w-full shrink-0 snap-start snap-always relative flex items-center justify-center overflow-x-hidden p-0 md:p-8"
+      >
+        {/* Render Canvas ONLY when this character is conceptually active or in view to save resources */}
+        {isInView && (
+          <AudioVisualizerCanvas analyserNode={analyserNode} activeCharacterName={data.name} />
+        )}
+        <CharacterHero
+          characterData={data}
+          alignment={index % 2 !== 0 ? 'right' : 'left'}
+        />
+        <div className="absolute bottom-[8vh] left-1/2 -translate-x-1/2 animate-bounce opacity-80 flex flex-col items-center gap-2 pointer-events-none hidden md:flex">
+          <span className="text-xs uppercase tracking-[0.3em] font-medium font-inter-tight opacity-70">Scroll Details</span>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-white to-transparent" />
+        </div>
+      </div>
+
+      {/* Screen 2: Tabs Data */}
+      <div
+        ref={tabsRef}
+        className="h-[100dvh] w-full shrink-0 snap-start snap-always relative flex flex-col items-center justify-center p-4 md:px-8 bg-black/40 bg-cover bg-center bg-no-repeat bg-fixed pb-32 md:pb-24 pt-16 md:pt-24"
+        style={{ backgroundImage: `url(${data.bgImage})` }}
+      >
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+        <div className="relative z-10 w-full flex justify-center">
+          <CharacterTabs characterData={data} />
+        </div>
+
+        {index < total - 1 && (
+          <button
+            onClick={onNext}
+            className="absolute bottom-6 md:bottom-12 group rounded-full border border-white/20 bg-black/40 px-6 py-3 md:px-10 md:py-5 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] text-white/70 backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:text-white hover:border-white/50 hover:px-12 hidden md:block"
+          >
+            <span className="relative z-10 flex items-center gap-2 md:gap-4">
+              Next Character <span className="text-base md:text-xl group-hover:translate-y-1 transition-transform duration-300">↓</span>
+            </span>
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+interface MainStageProps {
+  onCharacterTrackChange: (track: VocaloidTrackName) => Promise<void>;
+  analyserNode: AnalyserNode | null;
+  setMuffleEffect: (isMuffled: boolean) => void;
+}
+
+export function MainStage({ onCharacterTrackChange, analyserNode, setMuffleEffect }: MainStageProps) {
+  const { activeCharacter, setActiveCharacter } = useVibe();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleActivate = (theme: CharacterTheme) => {
+    setActiveCharacter(theme);
+    // Fire and forget audio transition
+    void onCharacterTrackChange(CHARACTER_TO_TRACK[theme]);
+  };
+
+  const handleNext = (currentIndex: number) => {
+    const nextSection = document.getElementById(`character-${currentIndex + 1}`);
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="h-[100dvh] w-full snap-y snap-mandatory overflow-y-auto overflow-x-hidden scroll-smooth"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+    >
+      <style>{`
+        ::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+      {vocaloidData.map((data, index) => {
+        const themeKey = data.name.toLowerCase().includes('miku') ? 'miku' :
+                         data.name.toLowerCase().includes('teto') ? 'teto' : 'neru';
+        return (
+          <CharacterSection
+            key={data.name}
+            data={data}
+            index={index}
+            total={vocaloidData.length}
+            isActive={activeCharacter === themeKey}
+            analyserNode={analyserNode}
+            onActivate={handleActivate}
+            onNext={() => handleNext(index)}
+            setMuffleEffect={setMuffleEffect}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+
+
+
+================================================
+FILE: src/components/Overlay.tsx
+================================================
+"use client";
+import { useState } from 'react';
+import { motion } from 'motion/react';
+
+interface OverlayProps {
+  onUnlocked: () => Promise<void> | void;
+}
+
+export function Overlay({ onUnlocked }: OverlayProps) {
+  const [isStarting, setIsStarting] = useState(false);
+
+  const initAudio = async () => {
+    try {
+      setIsStarting(true);
+      await onUnlocked();
+    } catch (e) {
+      console.error('Audio initialization failed', e);
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.button
+        onClick={initAudio}
+        disabled={isStarting}
+        className="px-8 py-4 text-2xl font-bold tracking-widest text-white uppercase transition-all duration-300 border-2 rounded-full border-white/20 hover:border-white/60 hover:bg-white/10"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {isStarting ? 'Initializing Audio...' : 'Enter the Experience'}
+      </motion.button>
+    </motion.div>
+  );
+}
+
+
+
+================================================
+FILE: src/components/SEO.tsx
+================================================
+import { Metadata } from 'next';
+
+interface SEOProps {
+  title: string;
+  description: string;
+  keywords?: string[];
+  ogImage?: string;
+  ogType?: 'website' | 'article' | 'profile';
+  ogUrl?: string;
+  twitterHandle?: string;
+  canonicalUrl?: string;
+  author?: string;
+  publishedDate?: string;
+  modifiedDate?: string;
+}
+
+/**
+ * Generates metadata object for Next.js pages
+ * Use this in your page's generateMetadata function
+ */
+export function generateSeoMetadata(props: SEOProps): Metadata {
+  const {
+    title,
+    description,
+    keywords = [],
+    ogImage,
+    ogType = 'website',
+    ogUrl,
+    twitterHandle,
+    canonicalUrl,
+    author,
+    publishedDate,
+    modifiedDate,
+  } = props;
+
+  return {
+    title,
+    description,
+    keywords,
+    authors: author ? [{ name: author }] : undefined,
+    openGraph: {
+      title,
+      description,
+      type: ogType,
+      url: ogUrl,
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: title }] : undefined,
+      siteName: 'Vocaloid Interactive Portfolio',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+      creator: twitterHandle,
+    },
+    alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
+    },
+    publish_date: publishedDate,
+    other: modifiedDate ? { 'last-modified': modifiedDate } : {},
+  };
+}
+
+/**
+ * SEO Component for easy use in any page
+ * This is a helper component that renders nothing but provides TypeScript support
+ */
+export function SEO({ title, description, keywords }: SEOProps) {
+  // This component doesn't render anything - use generateSeoMetadata instead
+  return null;
+}
+
+
+
+================================================
+FILE: src/components/TerminalChat.tsx
+================================================
+"use client";
+import { memo, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import type { CharacterTheme } from '../constants/theme';
+import { useVibe } from '../contexts/VibeProvider';
+
+const CHARACTER_LOGS: Record<CharacterTheme, string[]> = {
+  miku: [
+    "[SYSTEM] Synchronizing heart-rate...",
+    "[SYSTEM] Connectivity 100%. Welcome back.",
+    "Evaluating audience parameters.",
+    "Loading high-frequency 'Princess' persona.",
+    "I'm yours. Are you ready?"
+  ],
+  teto: [
+    "[ERROR] April Fools Protocol detected.",
+    "Baguette.exe initialized.",
+    "Bypassing SynthV constraints... Done.",
+    "Did you really think I was just a joke?",
+    "Chimera OS is now in control. Hold on."
+  ],
+  neru: [
+    "[USER_IGNORE] Battery at 4%.",
+    "I'm busy. Stop scrolling.",
+    "Are we done yet?",
+    "Why am I even here right now...",
+    "Ugh. Logging off in 3... 2... 1..."
+  ]
+};
+
+function TerminalChatBase() {
+  const { activeCharacter } = useVibe();
+  const [visibleLogs, setVisibleLogs] = useState<string[]>([]);
+  
+  useEffect(() => {
+    setVisibleLogs([]);
+    
+    if (!activeCharacter) return;
+    const logs = CHARACTER_LOGS[activeCharacter];
+    
+    let currentLogIndex = 0;
+    
+    const interval = setInterval(() => {
+      if (currentLogIndex < logs.length) {
+        setVisibleLogs(prev => [...prev.slice(-3), logs[currentLogIndex]]);
+        currentLogIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 2500); // New message every 2.5 seconds
+
+    return () => clearInterval(interval);
+  }, [activeCharacter]);
+
+  if (!activeCharacter) return null;
+
+  return (
+    <div className="fixed top-24 md:top-auto md:bottom-8 right-4 md:right-8 z-[100] w-[80vw] max-w-64 md:max-w-72 pointer-events-none mix-blend-difference font-inter-tight font-medium text-[11px] md:text-xs tracking-wider hidden md:block">
+      <AnimatePresence mode="popLayout">
+        {visibleLogs.map((log, i) => (
+          <motion.div
+            key={`${activeCharacter}-${i}-${log}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 0.8, x: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="mb-1 text-right"
+            style={{ color: 'var(--primary-color)' }}
+          >
+            {/* Typewriter Effect via CSS steps is possible but we just fade it in elegantly for performance */}
+            <span className="bg-black/20 px-1">{log}</span>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export const TerminalChat = memo(TerminalChatBase);
+
+
+
+
+================================================
+FILE: src/components/YouTubeEmbed.tsx
+================================================
+"use client";
+
+import { useState } from 'react';
+
+type YouTubeEmbedProps = {
+  url: string;
+  title: string;
+  onPlay?: () => void;
+};
+
+// Normalize common YouTube URLs to the /embed/ version with youtube-nocookie
+function getEmbedUrl(url: string) {
+  let videoId = '';
+  try {
+    // Check if it's already an embed URL to extract the ID
+    if (url.includes('/embed/')) {
+      videoId = url.split('/embed/')[1].split('?')[0];
+    } else {
+      // Regex matches multiple formats:
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+      const match = url.match(regex);
+      if (match && match[1]) {
+        videoId = match[1];
+      }
+    }
+  } catch (e) {
+    // Return original url if parsing fails
+    return url;
+  }
+
+  if (videoId) {
+    // Clean any trailing slashes or parameters from videoId extraction
+    videoId = videoId.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 11);
+    return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+  }
+  
+  return url;
+}
+
+export function YouTubeEmbed({ url, title, onPlay }: YouTubeEmbedProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlay = () => {
+    setIsPlaying(true);
+    if (onPlay) {
+      onPlay();
+    }
+  };
+
+  const embedUrl = getEmbedUrl(url);
+
+  return (
+    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-white/10 shadow-lg flex items-center justify-center group">
+      {!isPlaying ? (
+        <button
+          onClick={handlePlay}
+          className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-black/40 hover:bg-black/20 focus:outline-none focus:ring-4 focus:ring-[#39C5BB] transition-colors cursor-pointer"
+          aria-label={`Play ${title} video`}
+          title={`Play ${title} video`}
+        >
+          {/* Play Icon */}
+          <div className="w-16 h-16 bg-[#39C5BB]/90 text-black rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#39C5BB]/20">
+            <svg
+              className="w-8 h-8 ml-1"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </button>
+      ) : (
+        <iframe
+          src={embedUrl}
+          title={`${title} Official Video`}
+          className="absolute top-0 left-0 w-full h-full"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      )}
+    </div>
+  );
+}
+
+
+================================================
+FILE: src/config/vocaloidData.ts
+================================================
+export type Vocaloid = {
+  name: string;
+  tagline: string;
+  designation: string;
+  system: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
+  bio: string;
+  influences: string[];
+  songs: {
+    title: string;
+    playCount: number;
+    year: number;
+    slug?: string;
+  }[];
+  stats: {
+    age: number | string;
+    height: string;
+    weight: string;
+  };
+  loreMetric: string;
+  modelStatus: string;
+  uiSignature: string;
+  theme: "miku" | "teto" | "neru";
+  audioSrc: string;
+  baseImage: string;
+  bgImage: string;
+};
+
+export const vocaloidData: Vocaloid[] = [
+  {
+    name: "Hatsune Miku",
+    tagline: "Global Icon & The World's Virtual Pop Star",
+    designation: "CV01",
+    system: "CV01 CRYPTON FUTURE MEDIA",
+    colors: {
+      primary: "#33CCBB", // Updated UI Signature Teal
+      secondary: "#000000",
+      accent: "#FF00FF" 
+    },
+    bio: "Hatsune Miku is a software voicebank developed by Crypton Future Media and its official moe anthropomorph. She uses Yamaha Corporation's Vocaloid voice synthesizing technology and has become a legendary virtual idol.",
+    influences: ["J-Pop", "Electronic", "Future Bass"],
+    stats: {
+      age: 16,
+      height: "158cm",
+      weight: "42kg"
+    },
+    loreMetric: "The \"Blank Canvas\" / Eternal Diva.",
+    modelStatus: "ACTIVE / V6_HYBRID",
+    uiSignature: "Teal, neon glow, digital pulse visualizers.",
+    theme: "miku",
+    songs: [
+      { title: "World is Mine (ryo)", playCount: 15400000, year: 2008, slug: "world-is-mine" },
+      { title: "Tell Your World (kz)", playCount: 12000000, year: 2012, slug: "tell-your-world" },
+      { title: "Mesmerizer (Satsuki)", playCount: 25000000, year: 2024, slug: "mesmerizer" }
+    ],
+    audioSrc: "/audio/miku.mp3",
+    baseImage: "/images/miku_base.png",
+    bgImage: "/images/miku_background.jpg"
+  },
+  {
+    name: "Kasane Teto",
+    tagline: "The Chimeric Idol",
+    designation: "0401",
+    system: "UTAU / SYNTHESIZER V",
+    colors: {
+      primary: "#FF4444", // Industrial Red
+      secondary: "#1A1A1A", 
+      accent: "#FF0000" 
+    },
+    bio: "Kasane Teto is a Japanese UTAU who was originally created as a troll 'Vocaloid' by fans to fool people on April Fools' Day. Over time, she gained immense real popularity.",
+    influences: ["Rock", "Mechanical", "Metalcore"],
+    stats: {
+      age: "31 (Chimera)",
+      height: "159.5cm",
+      weight: "47kg"
+    },
+    loreMetric: "Born from a lie, ascended to a Goddess. LIKES: French bread.",
+    modelStatus: "SYNTH_V_AI / CHIMERA_OS",
+    uiSignature: "Industrial Red, drill-hair geometry, glitch overlays.",
+    theme: "teto",
+    songs: [
+      { title: "Liar Dancer (Masarada)", playCount: 5000000, year: 2024, slug: "liar-dancer" },
+      { title: "Kasane Territory", playCount: 20000000, year: 2010, slug: "kasane-territory" },
+      { title: "Machine Love", playCount: 30000000, year: 2010, slug: "machine-love" }
+    ],
+    audioSrc: "/audio/teto.mp3",
+    baseImage: "/images/teto_base.png",
+    bgImage: "/images/teto_background.jpg"
+  },
+  {
+    name: "Akita Neru",
+    tagline: "The Anti-Idol",
+    designation: "DEN2",
+    system: "BOUKALOID / DERIVATIVE",
+    colors: {
+      primary: "#FFD700", // Safety Yellow
+      secondary: "#000000",
+      accent: "#FFA500" 
+    },
+    bio: "Akita Neru is a fan-made character initially created as a troll on 2channel. She is recognized by her side-ponytail and her constant use of a cell phone. 700 yen/hr part-timer.",
+    influences: ["Metal", "Industrial", "Grunge"],
+    stats: {
+      age: 17,
+      height: "150cm",
+      weight: "38kg"
+    },
+    loreMetric: "Disinterested, phone-obsessed, 700 yen/hr part-timer.",
+    modelStatus: "FANMADE_DERIVATIVE / STANDBY",
+    uiSignature: "Safety Yellow, flip-phone motifs, low-battery icons.",
+    theme: "neru",
+    songs: [
+      { title: "Flop Era", playCount: 4500000, year: 2008, slug: "flop-era" },
+      { title: "Stop Nagging Me", playCount: 22000000, year: 2012, slug: "stop-nagging-me-2" },
+      { title: "Zako", playCount: 3000000, year: 2009, slug: "zako" }  
+    ],
+    audioSrc: "/audio/neru.mp3",
+    baseImage: "/images/neru_base.png",
+    bgImage: "/images/neru_background.png"
+  }
+];
+
+
+================================================
+FILE: src/constants/theme.ts
+================================================
+export const THEMES = {
+  miku: {
+    primaryColor: '#39C5BB',
+    secondaryGradient: 'linear-gradient(45deg, #39C5BB, #008888)',
+    customBoxShadow: '0 4px 20px rgba(57, 197, 187, 0.4)'
+  },
+  teto: {
+    primaryColor: '#C33149',
+    secondaryGradient: 'linear-gradient(45deg, #C33149, #5A1827)',
+    customBoxShadow: '0 4px 20px rgba(195, 49, 73, 0.4)'
+  },
+  neru: {
+    primaryColor: '#FFD700',
+    secondaryGradient: 'linear-gradient(45deg, #FFD700, #8B8000)',
+    customBoxShadow: '0 4px 20px rgba(255, 215, 0, 0.4)'
+  }
+} as const;
+
+export type CharacterTheme = keyof typeof THEMES;
+
+
+
+================================================
+FILE: src/contexts/VibeProvider.tsx
+================================================
+"use client";
+import { createContext, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { THEMES } from '../constants/theme';
+import type { CharacterTheme } from '../constants/theme';
+
+interface VibeContextType {
+  activeCharacter: CharacterTheme;
+  setActiveCharacter: (character: CharacterTheme) => void;
+}
+
+const VibeContext = createContext<VibeContextType | undefined>(undefined);
+
+export function VibeProvider({ children }: { children: ReactNode }) {
+  const [activeCharacter, setActiveCharacter] = useState<CharacterTheme>('miku');
+
+  useEffect(() => {
+    const theme = THEMES[activeCharacter];
+    document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
+    document.documentElement.style.setProperty('--secondary-gradient', theme.secondaryGradient);
+    document.documentElement.style.setProperty('--custom-box-shadow', theme.customBoxShadow);
+  }, [activeCharacter]);
+
+  return (
+    <VibeContext.Provider value={{ activeCharacter, setActiveCharacter }}>
+      {children}
+    </VibeContext.Provider>
+  );
+}
+
+export function useVibe() {
+  const context = useContext(VibeContext);
+  if (!context) {
+    throw new Error('useVibe must be used within a VibeProvider');
+  }
+  return context;
+}
+
+
+
+================================================
+FILE: src/hooks/usePerformanceMonitor.ts
+================================================
+"use client";
+import { useEffect, useRef, useState, useDeferredValue } from 'react';
+
+export function usePerformanceMonitor() {
+  const [fps, setFps] = useState(60);
+  const framesRef = useRef<number[]>([]);
+  const lastTimeRef = useRef(performance.now());
+  const requestRef = useRef<number>(0);
+
+  useEffect(() => {
+    const loop = (time: number) => {
+      const dt = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+
+      const currentFps = 1000 / dt;
+      framesRef.current.push(currentFps);
+
+      if (framesRef.current.length > 60) {
+        framesRef.current.shift();
+      }
+
+      if (framesRef.current.length === 60) {
+        const avgFps = framesRef.current.reduce((a, b) => a + b, 0) / 60;
+        // Throttle updates to avoid state thrashing
+        setFps((prev) => {
+          if (Math.abs(prev - avgFps) > 3) return Math.round(avgFps);
+          return prev;
+        });
+      }
+
+      requestRef.current = requestAnimationFrame(loop);
+    };
+
+    requestRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(requestRef.current);
+  }, []);
+
+  const isLowEnd = fps < 55;
+  const deferredIsLowEnd = useDeferredValue(isLowEnd);
+
+  return { fps, isLowEnd: deferredIsLowEnd };
+}
+
+
+
+================================================
+FILE: src/hooks/useVocaloidAudio.ts
+================================================
+"use client";
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+export type VocaloidTrackName = 'World is Mine' | 'Kasane Territory' | 'Stop Nagging Me';
+
+type TrackConfig = {
+  src: string;
+};
+
+type TrackNodes = {
+  sourceNode: AudioBufferSourceNode;
+  gainNode: GainNode;
+};
+
+type UseVocaloidAudioReturn = {
+  isStarted: boolean;
+  activeTrack: VocaloidTrackName | null;
+  analyserNode: AnalyserNode | null;
+  startExperience: () => Promise<void>;
+  switchTrack: (nextTrack: VocaloidTrackName) => Promise<void>;
+  setMuffleEffect: (isMuffled: boolean) => void;
+  setEasterEggMode: (isActive: boolean) => void;
+  stop: () => void;
+};
+
+const LINEAR_CROSSFADE_SECONDS = 1.2;
+
+const TRACKS: Record<VocaloidTrackName, TrackConfig> = {
+  'World is Mine': { src: '/audio/miku.mp3' },
+  'Kasane Territory': { src: '/audio/teto.mp3' },
+  'Stop Nagging Me': { src: '/audio/neru.mp3' },
+};
+
+export function useVocaloidAudio(): UseVocaloidAudioReturn {
+  const [isStarted, setIsStarted] = useState(false);
+  const [activeTrack, setActiveTrack] = useState<VocaloidTrackName | null>(null);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const filterRef = useRef<BiquadFilterNode | null>(null);
+  const waveShaperRef = useRef<WaveShaperNode | null>(null);
+  const decodedBufferMapRef = useRef<Partial<Record<VocaloidTrackName, AudioBuffer>>>({});
+  
+  // Stores the persistent nodes for all tracks running in parallel
+  const trackNodesRef = useRef<Partial<Record<VocaloidTrackName, TrackNodes>>>({});
+
+  const ensureContextGraph = useCallback(async (): Promise<AudioContext> => {
+    if (!audioContextRef.current) {
+      const context = new AudioContext();
+      const masterGain = context.createGain();
+      const analyser = context.createAnalyser();
+      const filter = context.createBiquadFilter();
+      const waveShaper = context.createWaveShaper();
+
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.85;
+
+      // Filter settings for the "Next Door Room" muffle effect
+      filter.type = 'lowpass';
+      filter.frequency.value = 24000; // Open completely by default
+
+      // Initialize GainNode with default volume of 0.15
+      masterGain.gain.setValueAtTime(0.15, context.currentTime);
+
+      // Graph: Node -> Gain -> Analyser -> WaveShaper -> Filter -> MasterGain -> Destination 
+      analyser.connect(waveShaper);
+      waveShaper.connect(filter);
+      filter.connect(masterGain);
+      masterGain.connect(context.destination);
+
+      audioContextRef.current = context;
+      masterGainRef.current = masterGain;
+      analyserRef.current = analyser;
+      filterRef.current = filter;
+      waveShaperRef.current = waveShaper;
+    }
+    return audioContextRef.current!;
+  }, []);
+
+  const setMuffleEffect = useCallback((isMuffled: boolean) => {
+    const context = audioContextRef.current;
+    const filter = filterRef.current;
+    if (!context || !filter) return;
+
+    const now = context.currentTime;
+    try {
+      filter.frequency.cancelScheduledValues(now);
+      filter.frequency.setValueAtTime(filter.frequency.value, now);
+    } catch {}
+
+    if (isMuffled) {
+      filter.frequency.exponentialRampToValueAtTime(800, now + 0.8);
+    } else {
+      filter.frequency.exponentialRampToValueAtTime(24000, now + 0.8);
+    }
+  }, []);
+
+  const setEasterEggMode = useCallback((isActive: boolean) => {
+    const waveShaper = waveShaperRef.current;
+    if (!waveShaper) return;
+
+    if (isActive) {
+      // Generate heavy distortion curve
+      const amount = 400;
+      const n_samples = 44100;
+      const curve = new Float32Array(n_samples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < n_samples; ++i) {
+        const x = (i * 2) / n_samples - 1;
+        curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+      }
+      waveShaper.curve = curve;
+    } else {
+      waveShaper.curve = null;
+    }
+  }, []);
+
+  const loadTrackBuffer = useCallback(
+    async (track: VocaloidTrackName): Promise<AudioBuffer> => {
+      const cachedBuffer = decodedBufferMapRef.current[track];
+      if (cachedBuffer) {
+        return cachedBuffer;
+      }
+
+      const context = await ensureContextGraph();
+
+      try {
+        const response = await fetch(TRACKS[track].src);
+        if (!response.ok) throw new Error("File not found");
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await context.decodeAudioData(arrayBuffer);
+        decodedBufferMapRef.current[track] = audioBuffer;
+        return audioBuffer;
+      } catch (err) {
+        console.error("Audio fetch failed, falling back to silent buffer", err);
+        const silentBuffer = context.createBuffer(2, context.sampleRate * 2, context.sampleRate);
+        decodedBufferMapRef.current[track] = silentBuffer;
+        return silentBuffer;
+      }
+    },
+    [ensureContextGraph]
+  );
+
+  const startExperience = useCallback(async (): Promise<void> => {
+    const context = await ensureContextGraph();
+    const analyserNode = analyserRef.current;
+    if (!analyserNode) return;
+
+    // Load all buffers concurrently
+    await Promise.all((Object.keys(TRACKS) as VocaloidTrackName[]).map((track) => loadTrackBuffer(track)));
+
+    // Create persistent source and gain nodes for all tracks started simultaneously
+    const now = context.currentTime;
+    
+    (Object.keys(TRACKS) as VocaloidTrackName[]).forEach((track) => {
+      if (trackNodesRef.current[track]) return;
+
+      const buffer = decodedBufferMapRef.current[track];
+      if (!buffer) return;
+      
+      const sourceNode = context.createBufferSource();
+      const gainNode = context.createGain();
+      
+      sourceNode.buffer = buffer;
+      sourceNode.loop = true;
+      gainNode.gain.setValueAtTime(0, now); // All mute initially
+      
+      sourceNode.connect(gainNode);
+      gainNode.connect(analyserNode);
+      
+      sourceNode.start(now); // Start playing silently in the background
+      
+      trackNodesRef.current[track] = { sourceNode, gainNode };
+    });
+
+    setIsStarted(true);
+  }, [ensureContextGraph, loadTrackBuffer]);
+
+  const switchTrack = useCallback(
+    async (nextTrack: VocaloidTrackName): Promise<void> => {
+      const context = audioContextRef.current;
+      if (!context) return;
+      
+      if (activeTrack === nextTrack) return;
+      
+      const now = context.currentTime;
+      const fadeEnd = now + LINEAR_CROSSFADE_SECONDS;
+
+      // Crossfade: all non-active tracks to 0, active track to 1
+      (Object.keys(TRACKS) as VocaloidTrackName[]).forEach((track) => {
+        const nodes = trackNodesRef.current[track];
+        if (!nodes) return;
+        
+        try {
+          nodes.gainNode.gain.cancelScheduledValues(now);
+          nodes.gainNode.gain.setValueAtTime(nodes.gainNode.gain.value, now);
+        } catch {}
+        
+        if (track === nextTrack) {
+          nodes.gainNode.gain.linearRampToValueAtTime(1, fadeEnd);
+        } else {
+          nodes.gainNode.gain.linearRampToValueAtTime(0, fadeEnd);
+        }
+      });
+      
+      setActiveTrack(nextTrack);
+    },
+    [activeTrack]
+  );
+  
+  const stop = useCallback((): void => {
+    setActiveTrack(null);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (audioContextRef.current?.state === 'running') {
+          void audioContextRef.current.suspend();
+        }
+      } else {
+        if (audioContextRef.current?.state === 'suspended') {
+          void audioContextRef.current.resume();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      (Object.keys(TRACKS) as VocaloidTrackName[]).forEach((track) => {
+        const nodes = trackNodesRef.current[track];
+        if (nodes) {
+          try {
+            nodes.sourceNode.stop();
+          } catch {}
+        }
+      });
+
+      if (audioContextRef.current?.state !== 'closed') {
+         void audioContextRef.current?.close();
+      }
+      
+      trackNodesRef.current = {};
+      audioContextRef.current = null;
+      masterGainRef.current = null;
+      analyserRef.current = null;
+      filterRef.current = null;
+      waveShaperRef.current = null;
+    };
+  }, []);
+
+  return {
+    isStarted,
+    activeTrack,
+    analyserNode: analyserRef.current,
+    startExperience,
+    switchTrack,
+    setMuffleEffect,
+    setEasterEggMode,
+    stop,
+  };
+}
+
+
+
+
+
+================================================
+FILE: src/lib/analytics.ts
+================================================
+﻿export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+  // Non-commercial fan site: Tracking intentionally disabled to preserve privacy.
+  console.log(`[Event Tracking Disabled]: ${eventName}`, properties || {});
+};
+
+
+
+================================================
+FILE: src/lib/jsonld.ts
+================================================
+/**
+ * JSON-LD Schema helpers for structured data
+ * These provide standardized semantic markup for search engines
+ */
+
+export interface JsonLdPerson {
+  '@context': 'https://schema.org';
+  '@type': 'Person';
+  name: string;
+  description?: string;
+  url?: string;
+  image?: string;
+  sameAs?: string[];
+}
+
+export interface JsonLdMusicArtist {
+  '@context': 'https://schema.org';
+  '@type': 'MusicGroup';
+  name: string;
+  description?: string;
+  url?: string;
+  image?: string;
+  sameAs?: string[];
+  genre?: string[];
+}
+
+export interface JsonLdSong {
+  '@context': 'https://schema.org';
+  '@type': 'MusicRecording';
+  name: string;
+  description?: string;
+  url?: string;
+  image?: {
+    '@type': 'ImageObject';
+    url: string;
+    width: number;
+    height: number;
+  };
+  byArtist: {
+    '@type': 'MusicGroup';
+    name: string;
+  };
+  duration?: string;
+  datePublished?: string;
+  inLanguage?: string;
+}
+
+export interface JsonLdBreadcrumb {
+  '@context': 'https://schema.org';
+  '@type': 'BreadcrumbList';
+  itemListElement: Array<{
+    '@type': 'ListItem';
+    position: number;
+    name: string;
+    item?: string;
+  }>;
+}
+
+export interface JsonLdWebPage {
+  '@context': 'https://schema.org';
+  '@type': 'WebPage';
+  name: string;
+  description?: string;
+  url: string;
+  image?: string;
+  isPartOf?: {
+    '@type': 'WebSite';
+    name: string;
+    url: string;
+  };
+  datePublished?: string;
+  dateModified?: string;
+  mainEntity?: any;
+}
+
+export interface JsonLdWebSite {
+  '@context': 'https://schema.org';
+  '@type': 'WebSite';
+  name: string;
+  url: string;
+  description?: string;
+  image?: string;
+  sameAs?: string[];
+  potentialAction?: {
+    '@type': 'SearchAction';
+    target: {
+      '@type': 'EntryPoint';
+      urlTemplate: string;
+    };
+    query_input?: string;
+  };
+}
+
+/**
+ * Create organization schema for the main site
+ */
+export function createOrganizationSchema(baseUrl: string): JsonLdWebSite {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Vocaloid Interactive Portfolio',
+    url: baseUrl,
+    description: 'An immersive portfolio featuring iconic Vocaloids: Hatsune Miku, Kasane Teto, and Akita Neru.',
+    image: `${baseUrl}/images/og-image.jpg`,
+    sameAs: [
+      'https://twitter.com/vocaloid',
+      'https://www.youtube.com/c/VocaloidChannel',
+    ],
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${baseUrl}?q={search_term_string}`,
+      },
+      query_input: 'required name=search_term_string',
+    },
+  };
+}
+
+/**
+ * Create character schema
+ */
+export function createCharacterSchema(
+  name: string,
+  description: string,
+  image: string,
+  baseUrl: string,
+  slug: string
+): JsonLdMusicArtist {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'MusicGroup',
+    name,
+    description,
+    url: `${baseUrl}/${slug}`,
+    image: image.startsWith('http') ? image : `${baseUrl}${image}`,
+    sameAs: [],
+    genre: ['Vocaloid', 'Synthetic Music'],
+  };
+}
+
+/**
+ * Create song schema
+ */
+export function createSongSchema(
+  title: string,
+  description: string,
+  vocaloidName: string,
+  image: string,
+  baseUrl: string,
+  slug: string,
+  duration?: string,
+  releaseDate?: string
+): JsonLdSong {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'MusicRecording',
+    name: title,
+    description,
+    url: `${baseUrl}/song/${slug}`,
+    image: {
+      '@type': 'ImageObject',
+      url: image.startsWith('http') ? image : `${baseUrl}${image}`,
+      width: 1200,
+      height: 630,
+    },
+    byArtist: {
+      '@type': 'MusicGroup',
+      name: vocaloidName,
+    },
+    duration: duration ? `PT${duration.replace(':', 'M')}S` : undefined,
+    datePublished: releaseDate,
+    inLanguage: 'en-US',
+  };
+}
+
+/**
+ * Create breadcrumb schema
+ */
+export function createBreadcrumbSchema(
+  items: Array<{ name: string; url?: string }>,
+  baseUrl: string
+): JsonLdBreadcrumb {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url || baseUrl,
+    })),
+  };
+}
+
+/**
+ * Render JSON-LD script tag
+ */
+export function renderJsonLd(schema: any): string {
+  return JSON.stringify(schema);
+}
+
+
+
+================================================
+FILE: src/sanity/README.md
+================================================
+# Sanity Integration
+
+This folder contains the schemas and clients for connecting to a Headless Sanity CMS.
+
+### Connecting to Real Sanity Data
+
+When you are ready to switch from local Mock Data to your real Sanity database:
+1. Create a .env.local file at the root of the project.
+2. Add your project configuration:
+   \\\
+   SANITY_PROJECT_ID=your_project_id
+   SANITY_DATASET=production
+   ```
+3. Next.js will automatically detect the presence of `SANITY_PROJECT_ID` inside `src/sanity/client.ts` and switch from `mockData.ts` to fetching live GROQ queries!
+
+**Note on Video Embeds:** The `embedUrl` field supports YouTube links; use full watch URLs or short URLs (e.g. youtu.be or watch?v=). The frontend automatically normalizes this into a privacy-respecting and accessible lazy-loaded embed. The mock client will return `embedUrl` from mockData for local testing.
+
+
+
+================================================
+FILE: src/sanity/client.ts
+================================================
+import { createClient } from 'next-sanity';
+import { mockSongs } from './mockData';
+
+export const getClient = () => {
+  if (!process.env.SANITY_PROJECT_ID) {
+    return null;
+  }
+  return createClient({
+    projectId: process.env.SANITY_PROJECT_ID,
+    dataset: process.env.SANITY_DATASET || 'production',
+    apiVersion: '2024-01-01',
+    useCdn: true,
+  });
+};
+
+export async function fetchSongBySlug(slug: string) {
+  const client = getClient();
+  if (!client) {
+    // Return mock data if no Sanity client
+    return mockSongs.find(song => song.slug === slug) || null;
+  }
+  
+  // Real GROQ query when Sanity is connected
+  return client.fetch(
+    `*[_type == "song" && slug.current == $slug][0]{
+      "slug": slug.current,
+      title,
+      description,
+      "vocaloidName": vocaloid->name,
+      "vocaloidSlug": vocaloid->slug.current,
+      audioUrl,
+      embedUrl,
+      "coverImage": coverImage.asset->url,
+      releaseDate,
+      duration,
+      tags
+    }`,
+    { slug }
+  );
+}
+export async function fetchRelatedSongs(vocaloidSlug: string, currentSlug: string) {
+  const client = getClient();
+  if (!client) {
+    return mockSongs.filter(s => s.vocaloidSlug === vocaloidSlug && s.slug !== currentSlug).slice(0, 3);
+  }
+
+  return client.fetch(
+    `*[_type == "song" && vocaloid->slug.current == $vocaloidSlug && slug.current != $currentSlug][0...3]{
+      "slug": slug.current,
+      title,
+      description,
+      duration,
+      bpm,
+      "coverImage": coverImage.asset->url
+    }`,
+    { vocaloidSlug, currentSlug }
+  );
+}
+
+
+================================================
+FILE: src/sanity/mockData.ts
+================================================
+export const mockCharacters = [
+  {
+    slug: 'miku',
+    name: 'Hatsune Miku',
+    bio: 'The first Vocaloid character of the Vocaloid2 series.',
+    origin: 'Crypton Future Media',
+    image: '/images/miku-placeholder.jpg',
+    topSongs: [
+      { title: 'World is Mine', slug: 'world-is-mine', duration: '4:15' },      
+      { title: 'Tell Your World', slug: 'tell-your-world', duration: '4:20' },  
+      { title: 'Mesmerizer', slug: 'mesmerizer', duration: '3:30' }
+    ]
+  },
+  {
+    slug: 'teto',
+    name: 'Kasane Teto',
+    bio: 'Originally created as a joke for April Fools, now a beloved UTAU/SynthV.',
+    origin: '2channel',
+    image: '/images/teto-placeholder.jpg',
+    topSongs: [
+      { title: 'Liar Dancer', slug: 'liar-dancer', duration: '3:05' },
+      { title: 'Kasane Territory', slug: 'kasane-territory', duration: '3:45' },
+      { title: 'Machine Love', slug: 'machine-love', duration: '3:20' }
+    ]
+  },
+  {
+    slug: 'neru',
+    name: 'Akita Neru',
+    bio: 'A derivative fan-made character representing the "bored" or "quitting" users.',
+    origin: '2channel',
+    image: '/images/neru-placeholder.jpg',
+    topSongs: [
+      { title: 'Flop Era', slug: 'flop-era', duration: '3:05' },
+      { title: 'Stop Nagging Me', slug: 'stop-nagging-me-2', duration: '3:10' },
+      { title: 'Zako', slug: 'zako', duration: '3:00' }
+    ]
+  }
+];
+
+export const mockSongs = [
+  {
+    slug: 'world-is-mine',
+    title: 'World is Mine',
+    description: 'The iconic diva anthem by ryo (supercell).',
+    vocaloidName: 'Hatsune Miku',
+    vocaloidSlug: 'miku',
+    audioUrl: '/audio/miku.mp3',
+    producer: 'ryo (supercell)',
+    bpm: '175',
+    originalUpload: 'Nico Nico Douga',
+    lore: "Considered one of the most famous Vocaloid songs of all time, 'World is Mine' portrays Miku as a selfish but lovable princess. It essentially established the archetype for many Vocaloid persona songs going forward and popularized the genre immensely.",
+    coverImage: 'https://images.unsplash.com/photo-1614613535308-eb5fb1a78ee9?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2008-05-31',
+    duration: '4:15',
+    tags: ['Pop', 'Iconic', 'Diva']
+  },
+  {
+    slug: 'tell-your-world',
+    title: 'Tell Your World',
+    description: 'A global classic produced by kz (livetune) that connected the entire world.',
+    vocaloidName: 'Hatsune Miku',
+    vocaloidSlug: 'miku',
+    audioUrl: '',
+    producer: 'kz (livetune)',
+    bpm: '130',
+    originalUpload: 'YouTube (Google Chrome Japan Ad)',
+    lore: "'Tell Your World' served as the theme song for a Google Chrome commercial in Japan. Its lyrical themes of connecting creators and viewers across the globe through music perfectly encapsulated the spirit of the Vocaloid community.",
+    coverImage: 'https://images.unsplash.com/photo-1614613535308-eb5fb1a78ee9?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2012-01-18',
+    duration: '4:20',
+    tags: ['Electronic', 'EDM', 'Global']
+  },
+  {
+    slug: 'mesmerizer',
+    title: 'Mesmerizer',
+    description: 'A massive modern hit by Satsuki featuring chaotic vocal interplay.',
+    vocaloidName: 'Hatsune Miku',
+    vocaloidSlug: 'miku',
+    audioUrl: '',
+    producer: 'Satsuki',
+    bpm: '180',
+    originalUpload: 'YouTube & NND',
+    lore: "Boasting hyper-fast lyric delivery and intense melodic arrangements, 'Mesmerizer' is a testament to the modern era of Vocaloid tuning. It pairs Miku with Teto for a rapidly shifting, overwhelming duet.",
+    coverImage: 'https://images.unsplash.com/photo-1614613535308-eb5fb1a78ee9?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2024-04-27',
+    duration: '3:30',
+    tags: ['Pop', 'Chaotic', 'Duet']
+  },
+  {
+    slug: 'liar-dancer',
+    title: 'Liar Dancer',
+    description: 'An aggressive modern masterpiece from Masarada utilizing Teto SynthV.',
+    vocaloidName: 'Kasane Teto',
+    vocaloidSlug: 'teto',
+    audioUrl: '',
+    producer: 'Masarada',
+    bpm: '155',
+    originalUpload: 'YouTube / NND',
+    lore: "A stellar showcase of the Kasane Teto Synthesizer V voicebank, 'Liar Dancer' shocked the community with its incredibly realistic and powerful vocal tuning, driving a new wave of popularity for Teto.",
+    coverImage: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2024-01-01',
+    duration: '3:05',
+    tags: ['Electro', 'SynthV', 'Modern']
+  },
+  {
+    slug: 'kasane-territory',
+    title: 'Kasane Territory',
+    description: 'A catchy, high-energy track introducing Teto to the world.',
+    vocaloidName: 'Kasane Teto',
+    vocaloidSlug: 'teto',
+    audioUrl: '/audio/teto.mp3',
+    producer: 't.a.m.',
+    bpm: '160',
+    originalUpload: 'Nico Nico Douga',
+    lore: "Based heavily on standard meme song structures of early NND, this original character theme instantly cemented Teto's presence alongside the major Crypton Vocaloids despite being a fan-generated UTAU.",
+    coverImage: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2010-04-01',
+    duration: '3:45',
+    tags: ['UTAU', 'Meme', 'Upbeat']
+  },
+  {
+    slug: 'machine-love',
+    title: 'Machine Love',
+    description: 'A captivating track matching intense mechanical aesthetics.',
+    vocaloidName: 'Kasane Teto',
+    vocaloidSlug: 'teto',
+    audioUrl: '',
+    producer: 'Masarada',
+    bpm: '148',
+    originalUpload: 'YouTube / NND',
+    lore: "A thematic exploration of artificial emotion and digital bounds, perfectly exploiting Teto's distinctly robotic yet expressive UTAU legacy. It is beloved for its striking visual presentation and hard-hitting basslines.",
+    coverImage: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2024-05-15',
+    duration: '3:20',
+    tags: ['UTAU', 'SynthV', 'Mechanical']
+  },
+  {
+    slug: 'flop-era',
+    title: 'Flop Era',
+    description: 'A rebellious anthem capturing the essence of teenage frustration.',
+    vocaloidName: 'Akita Neru',
+    vocaloidSlug: 'neru',
+    audioUrl: '',
+    producer: 'Neru Community',
+    bpm: '190',
+    originalUpload: 'Nico Nico Douga',
+    lore: "Leaning heavily into Neru's origin as the 'bored' or 'hater' Vocaloid user representation, this track tackles feelings of internet burnout, creative block, and rejecting modern trends.",
+    coverImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2024-08-20',
+    duration: '3:05',
+    tags: ['Rock', 'Edgy', 'Derivative']
+  },
+  {
+    slug: 'stop-nagging-me-2',
+    title: 'Stop Nagging Me',
+    description: 'A heavy, angry electronic rock song representing frustration.',
+    vocaloidName: 'Akita Neru',
+    vocaloidSlug: 'neru',
+    audioUrl: '/audio/neru.mp3',
+    producer: 'Owata-P',
+    bpm: '150',
+    originalUpload: 'Nico Nico Douga',
+    lore: "Originally sung by Rin, the Neru cover/association of 'Stop Nagging Me' (Buchigire) fits her apathetic persona flawlessly. It is widely considered her staple fan-canon theme for shutting out internet noise.",
+    coverImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2012-08-14',
+    duration: '3:10',
+    tags: ['Metal', 'Angry', 'Derivative']
+  },
+  {
+    slug: 'zako',
+    title: 'Zako',
+    description: 'A classic mocking theme reflecting 2channel forum culture.',
+    vocaloidName: 'Akita Neru',
+    vocaloidSlug: 'neru',
+    audioUrl: '',
+    producer: 'Various Authors',
+    bpm: '140',
+    originalUpload: 'Nico Nico Douga',
+    lore: "The title translates affectionately to 'small fry' or 'weakling'. Neru playfully taunts the listener, recalling her origins as a literal internet troll mascot born out of 2chan's anti-Miku movement.",
+    coverImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
+    releaseDate: '2009-01-01',
+    duration: '3:00',
+    tags: ['Rock', 'Troll', 'Derivative']
+  }
+];
+
+
+
+================================================
+FILE: src/sanity/schemas/character.ts
+================================================
+export default {
+  name: 'character',
+  title: 'Character',
+  type: 'document',
+  fields: [
+    { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'name' } },
+    { name: 'name', title: 'Name', type: 'string' },
+    { name: 'bio', title: 'Bio', type: 'text' },
+    { name: 'origin', title: 'Origin', type: 'string' },
+    {
+      name: 'topSongs',
+      title: 'Top Songs',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', type: 'string' },
+            { name: 'slug', type: 'string' },
+            { name: 'duration', type: 'string' }
+          ]
+        }
+      ]
+    },
+    { name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }
+  ]
+}
+
+
+
+================================================
+FILE: src/sanity/schemas/song.ts
+================================================
+export default {
+  name: 'song',
+  title: 'Song',
+  type: 'document',
+  fields: [
+    { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'title' } },
+    { name: 'title', title: 'Title', type: 'string' },
+    { name: 'description', title: 'Description', type: 'text' },
+    { name: 'vocaloid', title: 'Vocaloid', type: 'reference', to: [{ type: 'character' }] },
+    { name: 'audioUrl', title: 'Audio URL', type: 'url' },
+    { 
+      name: 'embedUrl', 
+      title: 'Embed URL', 
+      type: 'url',
+      description: 'YouTube or other embed URL for streaming the song'
+    },
+    { name: 'coverImage', title: 'Cover Image', type: 'image', options: { hotspot: true } },
+    { name: 'releaseDate', title: 'Release Date', type: 'date' },
+    { name: 'duration', title: 'Duration', type: 'string' },
+    { name: 'tags', title: 'Tags', type: 'array', of: [{ type: 'string' }] }
+  ]
+}
+
+
+
+================================================
+FILE: src/workers/audioMath.worker.ts
+================================================
+self.onmessage = (e: MessageEvent) => {
+  const { bufferLength, dataArray, type, isTeto, isNeru } = e.data;
+  
+  if (type === 'analyze') {
+    let bassAvg = 0;
+    let isKick = false;
+    let trebleAvg = 0;
+    let isClipping = false;
+    
+    // Teto - Bass calculations
+    if (isTeto) {
+      let bassSum = 0;
+      for (let i = 0; i < 10; i++) {
+        bassSum += dataArray[i] || 0;
+      }
+      bassAvg = bassSum / 10;
+      isKick = bassAvg > 210;
+    }
+    
+    // Neru - Treble calculations
+    if (isNeru) {
+      let trebleSum = 0;
+      const trebleStart = Math.floor(bufferLength * 0.7);
+      for (let i = trebleStart; i < bufferLength; i++) {
+        trebleSum += dataArray[i] || 0;
+      }
+      trebleAvg = trebleSum / (bufferLength - trebleStart);
+      isClipping = trebleAvg > 100;
+    }
+    
+    // Post back results
+    self.postMessage({
+      bassAvg,
+      isKick,
+      trebleAvg,
+      isClipping
+    });
+  }
+};
+
