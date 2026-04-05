@@ -120,6 +120,11 @@ export default function PortfolioScene() {
         onUpdate: (self) => {
           // Progress covers total panels including the Diagnostic Hero + final CTA footer
           setTargetProgress(self.progress * (totalProjects + 1));
+          scrollVelocityRef.current = Math.abs(self.getVelocity() / 3000);
+        },
+      });
+
+      panelsRef.current.forEach((panel, i) => {
         if (!panel) return;
         ScrollTrigger.create({
           trigger: panel,
