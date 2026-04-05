@@ -199,8 +199,8 @@ export default function PortfolioScene() {
         {PROJECTS.map((project, i) => (
           <div key={project.id} ref={(el) => {
             panelsRef.current[i + 1] = el;
-          }} className="flex min-h-screen items-start md:items-center py-10 md:py-0">
-            <ProjectCard project={project} index={i} total={PROJECTS.length} />
+          }} className={`flex min-h-screen items-start md:items-center py-10 md:py-0 w-full transition-all duration-1000 ${i % 2 === 0 ? 'lg:justify-start' : 'lg:justify-end'}`}>
+            <ProjectCard project={project} index={i} total={PROJECTS.length} /> 
           </div>
         ))}
 
