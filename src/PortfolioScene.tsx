@@ -118,13 +118,8 @@ export default function PortfolioScene() {
         start: "top top",
         end: "bottom bottom",
         onUpdate: (self) => {
-          // Progress covers total panels including the Diagnostic Hero
-          setTargetProgress(self.progress * totalProjects);
-          scrollVelocityRef.current = Math.abs(self.getVelocity() / 3000);
-        },
-      });
-
-      panelsRef.current.forEach((panel, i) => {
+          // Progress covers total panels including the Diagnostic Hero + final CTA footer
+          setTargetProgress(self.progress * (totalProjects + 1));
         if (!panel) return;
         ScrollTrigger.create({
           trigger: panel,
@@ -133,26 +128,30 @@ export default function PortfolioScene() {
           onToggle: (self) => {
             if (self.isActive) {
               setActiveIndex(i);
-              triggerGlitch();
+              // don't trigger heavy glitch for the footer
+              if (i <= totalProjects) triggerGlitch();
             }
           },
         });
 
-        gsap.fromTo(
-          panel.querySelector(".glass-card"),
-          { opacity: 0, y: 50, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            scrollTrigger: {
-              trigger: panel,
-              start: "top 75%",
-            },
-            duration: 1.2,
-            ease: "power4.out",
-          }
-        );
+        const card = panel.querySelector(".glass-card");
+        if (card) {
+          gsap.fromTo(
+            card,
+            { opacity: 0, y: 50, scale: 0.95 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              scrollTrigger: {
+                trigger: panel,
+                start: "top 75%",
+              },
+              duration: 1.2,
+              ease: "power4.out",
+            }
+          );
+        }
       });
     }, containerRef);
     return () => ctx.revert();
@@ -195,7 +194,12 @@ export default function PortfolioScene() {
           </div>
         ))}
 
-        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center pb-24">
+        <div 
+          ref={(el) => {
+            panelsRef.current[PROJECTS.length + 1] = el;
+          }}
+          className="min-h-[50vh] flex flex-col items-center justify-center text-center pb-24"
+        >
           <MagneticButton>
             <button className="group relative inline-flex items-center justify-center px-8 py-4 font-mono font-bold text-cyan-400 bg-transparent border border-cyan-500/50 rounded-sm overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-cyan-500/10 hover:shadow-[0_0_40px_rgba(6,182,212,0.4)]">
               <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-cyan-500"></span>
