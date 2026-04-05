@@ -185,11 +185,11 @@ export default function SceneObjects() {
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1.5} />
 
-      <SpineVisualizer index={0} />
-      <MedicalTablet index={1} />
-      <PulsingNodes index={2} />
-      <IsometricBlocks index={3} />
-      <ReactiveWaveform index={4} />
+      <SpineVisualizer index={1} />
+      <MedicalTablet index={2} />
+      <PulsingNodes index={3} />
+      <IsometricBlocks index={4} />
+      <ReactiveWaveform index={5} />
     </group>
   );
 }

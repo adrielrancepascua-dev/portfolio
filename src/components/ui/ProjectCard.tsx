@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Project } from '../../data/projects';
 import gsap from 'gsap';
+import { useExperience } from '../../hooks/useExperience';
 
 // Optional: extract magnetic effect hook
 function useMagneticEffect() {
@@ -83,13 +84,23 @@ function ScrambledText({ text }: { text: string }) {
 export function ProjectCard({ project, index, total }: { project: Project; index: number; total: number }) {
   const { ref, handleMouseMove, handleMouseLeave } = useMagneticEffect();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { triggerGlitch } = useExperience();
+
+  const onCardHover = (e: React.MouseEvent) => {
+    handleMouseMove(e);
+  };
+  
+  const onCardEnter = () => {
+    triggerGlitch();
+  };
 
   return (
     <div 
       ref={ref}
-      onMouseMove={handleMouseMove}
+      onMouseMove={onCardHover}
+      onMouseEnter={onCardEnter}
       onMouseLeave={handleMouseLeave}
-      className="glass-card w-full md:w-1/2 p-6 md:p-8 rounded-2xl border border-cyan-500/20 bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(6,182,212,0.1)] mt-[10vh] md:mt-0 max-w-lg md:max-w-none ml-0 md:ml-0"
+      className={`glass-card w-full md:w-1/2 p-6 md:p-8 rounded-2xl border ${project.title === 'Vocaloids' ? 'border-cyan-400 bg-cyan-900/40 shadow-[0_0_30px_rgba(6,182,212,0.3)]' : 'border-cyan-500/20 bg-slate-900/60'} backdrop-blur-xl shadow-[0_8px_32px_0_rgba(6,182,212,0.1)] mt-[10vh] md:mt-0 max-w-lg md:max-w-none ml-0 md:ml-0 transition-colors duration-500`}
     >
       <p className="font-mono text-xs tracking-[0.2em] uppercase mb-2" style={{ color: project.theme }}>
         [ SYSTEM {index + 1} / {total} ]

@@ -10,7 +10,10 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
         
         <h2 className="text-xl md:text-2xl text-cyan-400 font-bold mb-6 flex items-center gap-3 border-b border-cyan-500/30 pb-4 relative z-10">
           <Activity className="w-6 h-6 animate-pulse" />
-          [SUBJECT_DIAGNOSTIC]: THE OPTIMIZED ANOMALY
+          <div className="flex flex-col">
+            <span className="text-[10px] text-red-500 tracking-[0.2em] mb-1">ENCRYPTED_MEDICAL_FILE // SECURE_ACCESS_GRANTED</span>
+            [SUBJECT_DIAGNOSTIC]: THE OPTIMIZED ANOMALY
+          </div>
         </h2>
 
         <div className="space-y-6 text-slate-300 text-sm md:text-base leading-relaxed relative z-10">
@@ -24,7 +27,7 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
           </p>
           <p>
             <strong className="text-emerald-400 flex items-center gap-2 mb-1"><Terminal className="w-4 h-4"/> THE GHOST PROTOCOL</strong>
-            I am a "DesDev"—fueled by a desperate, relentless hunger to execute world-class projects. To me, inconvenience is merely a bug waiting to be patched, whether optimizing Roblox UBG or debugging a complex Supabase backend. I am the Ghost in the machine, working from the Philippines to solve global problems.
+            I am driven by Aggressive Growth. I view inconvenience as merely a bug waiting to be patched, whether it's optimizing Roblox UBG or debugging a complex Supabase backend. I am the Ghost in the machine, executing world-class projects from the Philippines to solve global problems.
           </p>
         </div>
 

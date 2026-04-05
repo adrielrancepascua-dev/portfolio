@@ -8,6 +8,7 @@ import { ProjectCard } from "./components/ui/ProjectCard";
 import SceneObjects from "./components/3d/SceneObjects";
 import { HUD } from "./components/ui/HUD";
 import { SystemDiagnostic } from "./components/ui/SystemDiagnostic";
+import { CustomCursor } from "./components/ui/CustomCursor";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { BlendFunction, ChromaticAberrationEffect } from "postprocessing";
 import { useExperience } from "./hooks/useExperience";
@@ -140,6 +141,8 @@ export default function PortfolioScene() {
       ref={containerRef}
       className="relative min-h-screen bg-[#090a0f] text-slate-50 font-sans selection:bg-cyan-500 selection:text-white"
     >
+      <CustomCursor />
+      <div className="crt-overlay mix-blend-overlay"></div>
       <div className="pointer-events-none fixed inset-0 z-50 mix-blend-overlay opacity-10"
         style={{
           background:
