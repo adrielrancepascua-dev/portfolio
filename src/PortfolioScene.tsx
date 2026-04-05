@@ -23,10 +23,13 @@ function LoadingManager() {
   const setIsReady = useExperience((s) => s.setIsReady);
 
   useEffect(() => {
-    if (progress === 100) {
-      setTimeout(() => setIsReady(true), 100); // small buffer for final compilation
-    }
-  }, [progress, setIsReady]);
+    // If there's nothing to load (procedural geometries), progress will often sit at 0 and never hit 100.
+    // Instead we wait a tick and force it ready if progress is 0, or if it hits 100
+    const t = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    return () => clearTimeout(t);
+  }, [setIsReady]);
 
   return null;
 }
