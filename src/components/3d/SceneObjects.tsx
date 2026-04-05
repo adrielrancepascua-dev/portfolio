@@ -232,10 +232,10 @@ export default function SceneObjects() {
         // activeIndex - 1 gives us the project index (0-based)
         // Use that to determine left/right positioning
         if ((activeIndex - 1) % 2 === 0) {
-          targetX = 3.5;   // Text on left, push model right
+          targetX = 2.2;   // Text on left, push model right
           targetRotY = -0.15;
         } else {
-          targetX = -3.5;  // Text on right, push model left
+          targetX = -2.2;  // Text on right, push model left
           targetRotY = 0.15;
         }
       }
@@ -267,7 +267,7 @@ export default function SceneObjects() {
   React.useEffect(() => {
     if (glitchTrigger > 0 && rootGroupRef.current) {
       const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5      
-        ? ((activeIndex - 1) % 2 === 0 ? 3.5 : -3.5)
+        ? ((activeIndex - 1) % 2 === 0 ? 2.2 : -2.2)
         : 0;
 
       rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
