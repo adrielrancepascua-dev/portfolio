@@ -16,8 +16,8 @@ export function HUD() {
       <div className="flex justify-between items-start">
          <div className="flex flex-col gap-1 text-cyan-400 bg-[#090a0f]/80 p-3 rounded-sm border border-cyan-500/30 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(6,182,212,0.15)] max-w-sm">
            <div className="text-[10px] text-slate-400 mb-1 border-b border-cyan-500/20 pb-1">CLINICAL DATA OVERLAY</div>
-           <div className="flex justify-between gap-4"><span className="text-slate-500">SUBJECT:</span> <span className="font-bold">PASCUA, A.R.</span></div>
-           <div className="flex justify-between gap-4"><span className="text-slate-500">ROLE:</span> <span className="font-bold">BSN-3 / FULL-STACK DEV</span></div>
+           <div className="flex justify-between gap-4"><span className="text-slate-500">SUBJECT:</span> <span className="font-bold">PASCUA, R.A.M.</span></div>
+           <div className="flex justify-between gap-4"><span className="text-slate-500">ROLE:</span> <span className="font-bold">BSN-2 / SYSTEMS ARCHITECT</span></div>
            <div className="flex justify-between gap-4 items-center mt-1 pt-1 border-t border-cyan-500/20">
              <span className="text-slate-500">STATUS:</span> 
              <span className="flex items-center gap-2 text-[10px] bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/30">

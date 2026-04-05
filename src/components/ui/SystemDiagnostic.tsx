@@ -30,7 +30,7 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
             I am a Clinical Systems Architect: a bridge between ward workflows and robust production systems. I combine clinical domain expertise with systems engineering to build reliable, safety-minded software that performs under pressure.
           </p>
           <p>
-            <em className="text-slate-400">3rd Year Nursing Student at Universidad de Dagupan. Building the future of clinical workflows through code.</em>
+            <em className="text-slate-400">20-year-old 2nd Year Nursing Student at Universidad de Dagupan. Building the future of clinical workflows through code.</em>
           </p>
         </div>
 
