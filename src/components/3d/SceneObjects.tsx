@@ -1,28 +1,30 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Environment, Float, MeshDistortMaterial } from '@react-three/drei';
+import { Environment, Float, MeshDistortMaterial, useGLTF, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useExperience } from '../../hooks/useExperience';
 
-function getScaleFactor(index: number, progress: number) {
-  const dist = Math.abs(index - progress);
-  // Use a steeper curve so only the current model is prominent
-  // At distance 0, scale = 1; at distance 0.5, scale ~= 0.25; at distance 1, scale ~= 0.001
-  return Math.max(0.001, Math.pow(Math.max(0, 1 - dist), 2));
+// Preload any external 3D assets to ensure they are fully cached before the scene renders.
+// Note: Since this scene uses procedural geometries, these are placeholder templates
+// for when GLTF models or Textures are introduced to prevent pop-in.
+// useGLTF.preload('/models/your-model.glb');
+// useTexture.preload('/textures/your-texture.png');
+
+function getScaleFactor(index: number, activeModel: number) {
+  // Hard visibility swap based on current active model to hide pop-in during glitch
+  return index === activeModel ? 1 : 0.001;
 }
 
-function SpineVisualizer({ index }: { index: number }) {
+function SpineVisualizer({ index, activeModel }: { index: number; activeModel: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const targetProgress = useExperience((s) => s.targetProgress);
-  const activeIndex = useExperience((s) => s.activeIndex);
   const isMobile = useExperience((s) => s.isMobile);
 
   const cylinderArgs = useMemo(() => (isMobile ? [0.2, 0.4, 0.3, 4] : [0.2, 0.4, 0.3, 8]), [isMobile]);
 
   useFrame((state) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const scaleFactor = getScaleFactor(index, activeModel);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.1) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
@@ -54,17 +56,15 @@ function SpineVisualizer({ index }: { index: number }) {
   );
 }
 
-function ClinicalCross({ index }: { index: number }) {
+function ClinicalCross({ index, activeModel }: { index: number; activeModel: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const targetProgress = useExperience((s) => s.targetProgress);
-  const activeIndex = useExperience((s) => s.activeIndex);
   const isMobile = useExperience((s) => s.isMobile);
 
   const ringArgs = useMemo(() => (isMobile ? [1.2, 0.02, 8, 32] : [1.2, 0.02, 16, 64]), [isMobile]);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
-      const scaleFactor = getScaleFactor(index, targetProgress);
+      const scaleFactor = getScaleFactor(index, activeModel);
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       
       if (scaleFactor > 0.01) {
@@ -103,16 +103,14 @@ function ClinicalCross({ index }: { index: number }) {
   );
 }
 
-function PulsingNodes({ index }: { index: number }) {
+function PulsingNodes({ index, activeModel }: { index: number; activeModel: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const targetProgress = useExperience((s) => s.targetProgress);
-  const activeIndex = useExperience((s) => s.activeIndex);
   const isMobile = useExperience((s) => s.isMobile);
 
   const sphereArgs = useMemo(() => (isMobile ? [0.3, 16, 16] : [0.3, 32, 32]), [isMobile]);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const scaleFactor = getScaleFactor(index, activeModel);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
@@ -135,13 +133,11 @@ function PulsingNodes({ index }: { index: number }) {
   );
 }
 
-function IsometricBlocks({ index }: { index: number }) {
+function IsometricBlocks({ index, activeModel }: { index: number; activeModel: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const targetProgress = useExperience((s) => s.targetProgress);
-  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const scaleFactor = getScaleFactor(index, activeModel);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
@@ -163,15 +159,13 @@ function IsometricBlocks({ index }: { index: number }) {
   );
 }
 
-function ReactiveWaveform({ index }: { index: number }) {
+function ReactiveWaveform({ index, activeModel }: { index: number; activeModel: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const targetProgress = useExperience((s) => s.targetProgress);
-  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const scaleFactor = getScaleFactor(index, activeModel);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
@@ -211,6 +205,16 @@ export default function SceneObjects() {
   const activeIndex = useExperience((s) => s.activeIndex);
   const isMobile = useExperience((s) => s.isMobile);
   const rootGroupRef = useRef<THREE.Group>(null);
+  
+  // Track the active model strictly to swap it while glitch is active, hiding render lag
+  const [activeModel, setActiveModel] = React.useState(activeIndex);
+
+  React.useEffect(() => {
+    // Only swap the 3D model visibility state during the 200ms glitch window
+    if (glitchActive) {
+      setActiveModel(activeIndex);
+    }
+  }, [glitchActive, activeIndex]);
 
   useFrame((state) => {
     if (rootGroupRef.current) {
@@ -274,11 +278,11 @@ export default function SceneObjects() {
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1.5} />
 
-      <SpineVisualizer index={1} />
-      <ClinicalCross index={2} />
-      <PulsingNodes index={3} />
-      <IsometricBlocks index={4} />
-      <ReactiveWaveform index={5} />
+      <SpineVisualizer index={1} activeModel={activeModel} />
+      <ClinicalCross index={2} activeModel={activeModel} />
+      <PulsingNodes index={3} activeModel={activeModel} />
+      <IsometricBlocks index={4} activeModel={activeModel} />
+      <ReactiveWaveform index={5} activeModel={activeModel} />
     </group>
   );
 }

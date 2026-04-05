@@ -1,5 +1,6 @@
-import React, { useRef, useLayoutEffect, useEffect } from "react";
+import React, { useRef, useLayoutEffect, useEffect, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
+import { useProgress } from "@react-three/drei";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import * as THREE from "three";
@@ -15,6 +16,20 @@ import { useExperience } from "./hooks/useExperience";
 import { useFrame } from "@react-three/fiber";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Global Ready State tracker using useProgress
+function LoadingManager() {
+  const { progress } = useProgress();
+  const setIsReady = useExperience((s) => s.setIsReady);
+
+  useEffect(() => {
+    if (progress === 100) {
+      setTimeout(() => setIsReady(true), 100); // small buffer for final compilation
+    }
+  }, [progress, setIsReady]);
+
+  return null;
+}
 
 function MagneticButton({ children }: { children: React.ReactElement }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -182,11 +197,13 @@ export default function PortfolioScene() {
       <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'} ${isMobile && glitchActive ? 'opacity-30 blur-sm mix-blend-difference' : ''}`}>
         <Canvas 
           camera={{ position: [0, 0, 5], fov: 45 }} 
-          onCreated={() => setIsReady(true)}
           dpr={isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio}
           frameloop={isMobile && !glitchActive ? "demand" : "always"}
         >
-          <SceneObjects />
+          <LoadingManager />
+          <Suspense fallback={null}>
+            <SceneObjects />
+          </Suspense>
           <ScrollEffects scrollVelocityRef={scrollVelocityRef} />
         </Canvas>
       </div>
