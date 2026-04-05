@@ -14,9 +14,14 @@ function SpineVisualizer({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const targetProgress = useExperience((s) => s.targetProgress);
+  const activeIndex = useExperience((s) => s.activeIndex);
+  // Use an adjusted display progress: when the scroll-derived progress is
+  // noticeably different from the active panel index, prefer the active
+  // index so the visible model matches the panel the user is actually on.
+  const displayProgress = Math.abs(activeIndex - targetProgress) > 0.6 ? activeIndex : targetProgress;
 
   useFrame((state) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const scaleFactor = getScaleFactor(index, displayProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.1) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
@@ -50,10 +55,12 @@ function SpineVisualizer({ index }: { index: number }) {
 function MedicalTablet({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
+  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(() => {
+    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
     if (groupRef.current) {
-      const scaleFactor = getScaleFactor(index, targetProgress);
+      const scaleFactor = getScaleFactor(index, displayProgress);
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
   });
@@ -77,14 +84,16 @@ function MedicalTablet({ index }: { index: number }) {
 function PulsingNodes({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
+  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
+    const scaleFactor = getScaleFactor(index, displayProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
         const pulse = 1 + Math.sin(clock.elapsedTime * 3) * 0.1;
-        groupRef.current.children.forEach((c) => c.scale.setScalar(pulse));
+        groupRef.current.children.forEach((c) => c.scale.setScalar(pulse));     
       }
     }
   });
@@ -104,9 +113,11 @@ function PulsingNodes({ index }: { index: number }) {
 function IsometricBlocks({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
+  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
+    const scaleFactor = getScaleFactor(index, displayProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
@@ -133,22 +144,24 @@ function ReactiveWaveform({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const targetProgress = useExperience((s) => s.targetProgress);
+  const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const scaleFactor = getScaleFactor(index, targetProgress);
+    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
+    const scaleFactor = getScaleFactor(index, displayProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
 
-    // Always update the waveform instance matrices and factor in the current
-    // scaleFactor so elements do not leave behind large/uninitialized bounds.
+    // Always update the waveform instance matrices and factor in the current   
+    // scaleFactor so elements do not leave behind large/uninitialized bounds.  
     if (meshRef.current) {
       const time = clock.elapsedTime;
       for (let i = 0; i < 16; i++) {
-        const bassTransient = Math.pow(Math.sin(time * 3 + i * 0.5), 4) * 1.8;
+        const bassTransient = Math.pow(Math.sin(time * 3 + i * 0.5), 4) * 1.8;  
         const lowPassMuffle = Math.sin(time * 0.8 + i) * 0.3;
         // combine dynamic Y pulse with the global scale factor
-        const scaleY = (1 + bassTransient + lowPassMuffle) * scaleFactor;
+        const scaleY = (1 + bassTransient + lowPassMuffle) * scaleFactor;       
 
         dummy.position.set((i - 7.5) * 0.3, 0, 0);
         dummy.scale.set(scaleFactor, scaleY, scaleFactor);
