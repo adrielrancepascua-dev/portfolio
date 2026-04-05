@@ -179,7 +179,7 @@ export default function PortfolioScene() {
 
       <HUD />
 
-      <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'} ${isMobile && glitchActive ? 'opacity-30 blur-sm mix-blend-difference' : ''}`}>
+      <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'} ${isMobile && glitchActive ? 'opacity-30 blur-sm mix-blend-difference' : ''}`}>
         <Canvas 
           camera={{ position: [0, 0, 5], fov: 45 }} 
           onCreated={() => setIsReady(true)}

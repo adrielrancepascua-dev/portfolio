@@ -96,16 +96,21 @@ export function ProjectCard({ project, index, total }: { project: Project; index
   };
 
   return (
-    <div 
+    <div
       ref={ref}
       onMouseMove={onCardHover}
       onMouseEnter={onCardEnter}
       onMouseLeave={handleMouseLeave}
-      className={`glass-card w-full md:w-1/2 p-6 md:p-8 rounded-2xl border ${project.title === 'Vocaloids' ? 'border-cyan-400 bg-cyan-900/40 shadow-[0_0_30px_rgba(6,182,212,0.3)]' : 'border-cyan-500/20 bg-slate-900/60'} backdrop-blur-xl shadow-[0_8px_32px_0_rgba(6,182,212,0.1)] mt-[10vh] md:mt-0 max-w-lg md:max-w-none ml-0 md:ml-0 transition-colors duration-500`}
+      className={`glass-card w-full md:w-1/2 p-6 md:p-8 rounded-2xl border ${project.title === 'Vocaloids' ? 'border-cyan-400 bg-cyan-900/40 shadow-[0_0_30px_rgba(6,182,212,0.3)]' : 'border-cyan-500/20 bg-slate-900/60'} backdrop-blur-xl shadow-[0_8px_32px_0_rgba(6,182,212,0.1)] mt-[10vh] md:mt-0 max-w-lg lg:max-w-[45%] md:mx-0 transition-colors duration-500`}
     >
-      <p className="font-mono text-xs tracking-[0.2em] uppercase mb-2" style={{ color: project.theme }}>
-        [ SYSTEM {index + 1} / {total} ]
-      </p>
+      <div className="flex items-center gap-4 mb-2 opacity-80">
+        <p className="font-mono text-xs tracking-widest text-slate-500 font-bold border border-slate-700 bg-slate-900/50 px-2 py-1 rounded">
+          [00{index + 1}] SECTOR
+        </p>
+        <p className="font-mono text-xs tracking-[0.2em] uppercase" style={{ color: project.theme }}>
+          [ SYSTEM {index + 1} / {total} ]
+        </p>
+      </div>
       <ScrambledText text={project.title} />
       <h3 className="text-lg md:text-xl font-medium text-slate-300 mb-4 font-sans hover:text-cyan-400 transition-colors">
         {project.subtitle}

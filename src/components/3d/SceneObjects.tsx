@@ -228,10 +228,10 @@ export default function SceneObjects() {
 
       if (!isMobile && activeIndex > 0 && activeIndex <= 5) {
         if (activeIndex % 2 === 0) {
-          targetX = 2.2;
+          targetX = 3.5;
           targetRotY = -0.15; // Rotate slightly negative (left) toward text
         } else {
-          targetX = -2.2;
+          targetX = -3.5;
           targetRotY = 0.15;  // Rotate slightly positive (right) toward text
         }
       }
@@ -253,8 +253,8 @@ export default function SceneObjects() {
 
   React.useEffect(() => {
     if (glitchTrigger > 0 && rootGroupRef.current) {
-      const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5 
-        ? (activeIndex % 2 === 0 ? 2.2 : -2.2) 
+      const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5      
+        ? (activeIndex % 2 === 0 ? 3.5 : -3.5)
         : 0;
 
       rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
