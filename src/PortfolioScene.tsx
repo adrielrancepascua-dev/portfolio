@@ -52,7 +52,7 @@ function ScrollEffects({ scrollVelocityRef }: { scrollVelocityRef: React.RefObje
     () =>
       new ChromaticAberrationEffect({
         blendFunction: BlendFunction.NORMAL,
-        offset: new THREE.Vector2(0.002, 0.002),
+        offset: new THREE.Vector2(0, 0), // Start with 0 offset (perfectly merged)
         radialModulation: false,
         modulationOffset: 0.15,
       }),
@@ -63,8 +63,9 @@ function ScrollEffects({ scrollVelocityRef }: { scrollVelocityRef: React.RefObje
     let velocity = scrollVelocityRef.current ?? 0;
     velocity = gsap.utils.clamp(0, 0.05, velocity);
 
-    chromaticEffect.offset.x = THREE.MathUtils.lerp(chromaticEffect.offset.x, 0.002 + velocity, 0.1);
-    chromaticEffect.offset.y = THREE.MathUtils.lerp(chromaticEffect.offset.y, 0.002 + velocity, 0.1);
+    // Lerp back to 0 so the RGB channels perfectly align into one object when stopped
+    chromaticEffect.offset.x = THREE.MathUtils.lerp(chromaticEffect.offset.x, velocity * 0.5, 0.1);
+    chromaticEffect.offset.y = THREE.MathUtils.lerp(chromaticEffect.offset.y, velocity * 0.5, 0.1);
   });
 
   return (
