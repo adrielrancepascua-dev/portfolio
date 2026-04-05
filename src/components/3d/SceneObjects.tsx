@@ -52,29 +52,46 @@ function SpineVisualizer({ index }: { index: number }) {
   );
 }
 
-function MedicalTablet({ index }: { index: number }) {
+function ClinicalCross({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
   const activeIndex = useExperience((s) => s.activeIndex);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
     if (groupRef.current) {
       const scaleFactor = getScaleFactor(index, displayProgress);
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
+      
+      if (scaleFactor > 0.01) {
+        groupRef.current.rotation.y = clock.elapsedTime * 0.4;
+        groupRef.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.2;
+      }
     }
   });
 
   return (
     <group ref={groupRef}>
-      <Float speed={4} rotationIntensity={0.5} floatIntensity={2}>
+      <Float speed={3} rotationIntensity={0.5} floatIntensity={1.5}>
+        {/* Vertical bar */}
         <mesh>
-          <boxGeometry args={[2.5, 3.5, 0.1]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.1} metalness={0.8} />
+          <boxGeometry args={[0.3, 1.5, 0.3]} />
+          <meshStandardMaterial color="#2dd4bf" roughness={0.2} metalness={0.8} />
         </mesh>
-        <mesh position={[0, 0, 0.06]}>
-          <planeGeometry args={[2.3, 3.3]} />
-          <meshBasicMaterial color="#06b6d4" transparent opacity={0.3} />
+        {/* Horizontal bar */}
+        <mesh>
+          <boxGeometry args={[1.5, 0.3, 0.3]} />
+          <meshStandardMaterial color="#2dd4bf" roughness={0.2} metalness={0.8} />
+        </mesh>
+        {/* Glowing core */}
+        <mesh>
+          <boxGeometry args={[0.32, 0.32, 0.32]} />
+          <meshBasicMaterial color="#ffffff" wireframe />
+        </mesh>
+        {/* Orbiting data ring */}
+        <mesh rotation={[Math.PI / 2.5, 0, 0]}>
+          <torusGeometry args={[1.2, 0.02, 16, 64]} />
+          <meshBasicMaterial color="#2dd4bf" transparent opacity={0.5} />
         </mesh>
       </Float>
     </group>
@@ -215,7 +232,7 @@ export default function SceneObjects() {
       <directionalLight position={[10, 10, 5]} intensity={1.5} />
 
       <SpineVisualizer index={1} />
-      <MedicalTablet index={2} />
+      <ClinicalCross index={2} />
       <PulsingNodes index={3} />
       <IsometricBlocks index={4} />
       <ReactiveWaveform index={5} />
