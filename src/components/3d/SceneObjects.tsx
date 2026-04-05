@@ -6,7 +6,9 @@ import { useExperience } from '../../hooks/useExperience';
 
 function getScaleFactor(index: number, progress: number) {
   const dist = Math.abs(index - progress);
-  return Math.max(0.001, 1 - dist);
+  // Use a steeper curve so only the current model is prominent
+  // At distance 0, scale = 1; at distance 0.5, scale ~= 0.25; at distance 1, scale ~= 0.001
+  return Math.max(0.001, Math.pow(Math.max(0, 1 - dist), 2));
 }
 
 function SpineVisualizer({ index }: { index: number }) {
