@@ -22,9 +22,14 @@ function SpineVisualizer({ index }: { index: number }) {
       if (scaleFactor > 0.1) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
     }
 
-    if (meshRef.current && scaleFactor > 0.01) {
+    // Always update instance matrices to avoid uninitialized/bad matrices
+    // which can produce giant bounding extents / blank canvases on some devices.
+    if (meshRef.current) {
       for (let i = 0; i < 8; i++) {
         dummy.position.set(0, (i - 3.5) * 0.4, 0);
+        // apply the scaleFactor to each instance so the mesh appears/vanishes
+        // smoothly and never leaves an uninitialized transform behind.
+        dummy.scale.set(scaleFactor, scaleFactor, scaleFactor);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
       }
@@ -135,15 +140,18 @@ function ReactiveWaveform({ index }: { index: number }) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
 
-    if (meshRef.current && scaleFactor > 0.01) {
+    // Always update the waveform instance matrices and factor in the current
+    // scaleFactor so elements do not leave behind large/uninitialized bounds.
+    if (meshRef.current) {
       const time = clock.elapsedTime;
       for (let i = 0; i < 16; i++) {
         const bassTransient = Math.pow(Math.sin(time * 3 + i * 0.5), 4) * 1.8;
         const lowPassMuffle = Math.sin(time * 0.8 + i) * 0.3;
-        const scaleY = 1 + bassTransient + lowPassMuffle;
+        // combine dynamic Y pulse with the global scale factor
+        const scaleY = (1 + bassTransient + lowPassMuffle) * scaleFactor;
 
         dummy.position.set((i - 7.5) * 0.3, 0, 0);
-        dummy.scale.set(1, scaleY, 1);
+        dummy.scale.set(scaleFactor, scaleY, scaleFactor);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
       }
