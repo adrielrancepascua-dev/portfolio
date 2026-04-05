@@ -15,6 +15,9 @@ function SpineVisualizer({ index }: { index: number }) {
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const targetProgress = useExperience((s) => s.targetProgress);
   const activeIndex = useExperience((s) => s.activeIndex);
+  const isMobile = useExperience((s) => s.isMobile);
+
+  const cylinderArgs = useMemo(() => (isMobile ? [0.2, 0.4, 0.3, 4] : [0.2, 0.4, 0.3, 8]), [isMobile]);
   // Use an adjusted display progress: when the scroll-derived progress is
   // noticeably different from the active panel index, prefer the active
   // index so the visible model matches the panel the user is actually on.
@@ -45,7 +48,8 @@ function SpineVisualizer({ index }: { index: number }) {
   return (
     <group ref={groupRef}>
       <instancedMesh ref={meshRef} args={[undefined, undefined, 8]}>
-        <cylinderGeometry args={[0.2, 0.4, 0.3, 8]} />
+        {/* @ts-ignore */}
+        <cylinderGeometry args={cylinderArgs} />
         <meshBasicMaterial color="#06b6d4" wireframe />
       </instancedMesh>
     </group>
@@ -56,6 +60,9 @@ function ClinicalCross({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
   const activeIndex = useExperience((s) => s.activeIndex);
+  const isMobile = useExperience((s) => s.isMobile);
+
+  const ringArgs = useMemo(() => (isMobile ? [1.2, 0.02, 8, 32] : [1.2, 0.02, 16, 64]), [isMobile]);
 
   useFrame(({ clock }) => {
     const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
@@ -90,7 +97,8 @@ function ClinicalCross({ index }: { index: number }) {
         </mesh>
         {/* Orbiting data ring */}
         <mesh rotation={[Math.PI / 2.5, 0, 0]}>
-          <torusGeometry args={[1.2, 0.02, 16, 64]} />
+          {/* @ts-ignore */}
+          <torusGeometry args={ringArgs} />
           <meshBasicMaterial color="#2dd4bf" transparent opacity={0.5} />
         </mesh>
       </Float>
@@ -102,6 +110,9 @@ function PulsingNodes({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const targetProgress = useExperience((s) => s.targetProgress);
   const activeIndex = useExperience((s) => s.activeIndex);
+  const isMobile = useExperience((s) => s.isMobile);
+
+  const sphereArgs = useMemo(() => (isMobile ? [0.3, 16, 16] : [0.3, 32, 32]), [isMobile]);
 
   useFrame(({ clock }) => {
     const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
@@ -119,7 +130,8 @@ function PulsingNodes({ index }: { index: number }) {
     <group ref={groupRef}>
       {[-1, 0, 1].map((x, i) => (
         <mesh key={i} position={[x, Math.sin(x) * 0.5, 0]}>
-          <sphereGeometry args={[0.3, 32, 32]} />
+          {/* @ts-ignore */}
+          <sphereGeometry args={sphereArgs} />
           <MeshDistortMaterial color="#38bdf8" speed={5} distort={0.4} />
         </mesh>
       ))}

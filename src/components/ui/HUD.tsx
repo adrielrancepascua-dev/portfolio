@@ -8,11 +8,10 @@ export function HUD() {
 
   const getOverlayStyle = () => {
     if (!isMobile) return {};
-    // Calculate global scroll progress approximation assuming about 5 projects.
     const globalProgress = Math.min(Math.max(targetProgress / 5, 0), 1);
     
-    // Scale and fade slightly over the first 20% of the total scroll
-    const animProgress = Math.min(globalProgress / 0.2, 1);
+    // Scale and fade slightly over the first 5% of the total scroll
+    const animProgress = Math.min(globalProgress / 0.05, 1);
 
     const scale = 1 - (animProgress * 0.2); // scales from 1 to 0.8
     const opacity = 1 - (animProgress * 0.6); // fades from 1 to 0.4
@@ -20,28 +19,21 @@ export function HUD() {
     const translateX = animProgress * 10;
 
     return {
-      transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
+      transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
       opacity: animProgress > 0 ? opacity : 1,
       transformOrigin: 'top right',
       transition: 'opacity 0.2s ease-out, transform 0.2s ease-out'
     };
   };
 
-  const getBottomBarStyle = () => {
-    if (!isMobile) return {};
-    
-    // Calculate global scroll progress approximation.
+  const getBottomBarState = () => {
+    if (!isMobile) return { opacity: 1, y: 0 };
     const globalProgress = Math.min(Math.max(targetProgress / 5, 0), 1);
-    
-    // Fades out completely by the time scroll hits 10%
     const opacity = Math.max(0, 1 - (globalProgress / 0.1));
-    return {
-      opacity,
-      transform: `translateY(${globalProgress * 100}px)`,
-      transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
-      pointerEvents: opacity > 0 ? ('auto' as const) : ('none' as const)
-    };
+    return { opacity, y: globalProgress * 100 };
   };
+
+  const bottomState = getBottomBarState();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -68,9 +60,14 @@ export function HUD() {
          </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="flex justify-center md:justify-start items-end mb-4 md:mb-0 transition-opacity transition-transform duration-300" style={getBottomBarStyle()}>
-         <div className="bg-[#090a0f]/90 p-4 rounded-lg border border-slate-800/80 backdrop-blur-md space-y-4 pointer-events-auto w-full max-w-[280px] shadow-lg">
+      {/* Bottom Bar: Only render if opacity > 0 to declutter mobile viewport entirely */}
+      {(!isMobile || bottomState.opacity > 0) && (
+        <div className="flex justify-center md:justify-start items-end mb-4 md:mb-0 transition-opacity transition-transform duration-300" style={{
+          opacity: bottomState.opacity,
+          transform: `translate3d(0, ${bottomState.y}px, 0)`,
+          pointerEvents: bottomState.opacity > 0 ? ('auto' as const) : ('none' as const)
+        }}>
+           <div className="bg-[#090a0f]/90 p-4 rounded-lg border border-slate-800/80 backdrop-blur-md space-y-4 pointer-events-auto w-full max-w-[280px] shadow-lg">
             <div>
               <div className="flex justify-between text-[10px] text-slate-400 mb-1.5">
                 <span className="tracking-widest">MISSION: BAGUIO_CITY_TRANSFER</span>
@@ -88,7 +85,8 @@ export function HUD() {
               </div>
             </div>
          </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

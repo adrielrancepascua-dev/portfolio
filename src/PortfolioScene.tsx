@@ -90,7 +90,7 @@ export default function PortfolioScene() {
   const panelsRef = useRef<(HTMLDivElement | null)[]>([]);
   const scrollVelocityRef = useRef(0);
 
-  const { setActiveIndex, setTargetProgress, triggerGlitch, startPerformanceMonitor, setIsMobile, setIsReady, isReady, isMobile } = useExperience();
+  const { setActiveIndex, setTargetProgress, triggerGlitch, startPerformanceMonitor, setIsMobile, setIsReady, isReady, isMobile, glitchActive } = useExperience();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -179,8 +179,13 @@ export default function PortfolioScene() {
 
       <HUD />
 
-      <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
-        <Canvas camera={{ position: [0, 0, 5], fov: 45 }} onCreated={() => setIsReady(true)}>
+      <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'} ${isMobile && glitchActive ? 'opacity-30 blur-sm mix-blend-difference' : ''}`}>
+        <Canvas 
+          camera={{ position: [0, 0, 5], fov: 45 }} 
+          onCreated={() => setIsReady(true)}
+          dpr={isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio}
+          frameloop={isMobile && !glitchActive ? "demand" : "always"}
+        >
           <SceneObjects />
           <ScrollEffects scrollVelocityRef={scrollVelocityRef} />
         </Canvas>
