@@ -18,13 +18,9 @@ function SpineVisualizer({ index }: { index: number }) {
   const isMobile = useExperience((s) => s.isMobile);
 
   const cylinderArgs = useMemo(() => (isMobile ? [0.2, 0.4, 0.3, 4] : [0.2, 0.4, 0.3, 8]), [isMobile]);
-  // Use an adjusted display progress: when the scroll-derived progress is
-  // noticeably different from the active panel index, prefer the active
-  // index so the visible model matches the panel the user is actually on.
-  const displayProgress = Math.abs(activeIndex - targetProgress) > 0.6 ? activeIndex : targetProgress;
 
   useFrame((state) => {
-    const scaleFactor = getScaleFactor(index, displayProgress);
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.1) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
@@ -65,9 +61,8 @@ function ClinicalCross({ index }: { index: number }) {
   const ringArgs = useMemo(() => (isMobile ? [1.2, 0.02, 8, 32] : [1.2, 0.02, 16, 64]), [isMobile]);
 
   useFrame(({ clock }) => {
-    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
     if (groupRef.current) {
-      const scaleFactor = getScaleFactor(index, displayProgress);
+      const scaleFactor = getScaleFactor(index, targetProgress);
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       
       if (scaleFactor > 0.01) {
@@ -115,8 +110,7 @@ function PulsingNodes({ index }: { index: number }) {
   const sphereArgs = useMemo(() => (isMobile ? [0.3, 16, 16] : [0.3, 32, 32]), [isMobile]);
 
   useFrame(({ clock }) => {
-    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
-    const scaleFactor = getScaleFactor(index, displayProgress);
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
@@ -145,8 +139,7 @@ function IsometricBlocks({ index }: { index: number }) {
   const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
-    const scaleFactor = getScaleFactor(index, displayProgress);
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
       if (scaleFactor > 0.01) {
@@ -176,8 +169,7 @@ function ReactiveWaveform({ index }: { index: number }) {
   const activeIndex = useExperience((s) => s.activeIndex);
 
   useFrame(({ clock }) => {
-    const displayProgress = Math.abs(targetProgress - activeIndex) > 0.6 ? activeIndex : targetProgress;
-    const scaleFactor = getScaleFactor(index, displayProgress);
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
       groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
