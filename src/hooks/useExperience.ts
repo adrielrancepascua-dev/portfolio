@@ -20,11 +20,12 @@ interface ExperienceState {
   setIsReady: (v: boolean) => void;
 }
 
-export const useExperience = create<ExperienceState>((set) => {
+export const useExperience = create<ExperienceState>((set, get) => {
   // RAF state kept in closure to avoid re-creating monitors
   let rafId: number | null = null;
   let last = 0;
   let frames = 0;
+  let pendingIndex: number | null = null;
 
   function startPerformanceMonitor() {
     if (rafId) return;
@@ -62,11 +63,27 @@ export const useExperience = create<ExperienceState>((set) => {
     isMobile: false,
     isReady: false,
 
-    setActiveIndex: (index) => set({ activeIndex: index }),
+    setActiveIndex: (index) => {
+      const state = get();
+      if (state.activeIndex === index) return;
+      
+      if (state.glitchActive) {
+        pendingIndex = index;
+        return;
+      }
+      
+      set({ activeIndex: index });
+    },
     setTargetProgress: (progress) => set({ targetProgress: progress }),
     triggerGlitch: (duration = 200) => {
       set((state) => ({ glitchTrigger: state.glitchTrigger + 1, glitchActive: true }));
-      setTimeout(() => set({ glitchActive: false }), duration);
+      setTimeout(() => {
+        set({ glitchActive: false });
+        if (pendingIndex !== null) {
+          get().setActiveIndex(pendingIndex);
+          pendingIndex = null;
+        }
+      }, duration);
     },
     startPerformanceMonitor,
     stopPerformanceMonitor,
