@@ -210,8 +210,9 @@ export default function SceneObjects() {
   const [activeModel, setActiveModel] = React.useState(activeIndex);
 
   React.useEffect(() => {
-    // Only swap the 3D model visibility state during the 200ms glitch window
-    if (glitchActive) {
+    // Swap the 3D model visibility state during the glitch window,
+    // or immediately when leaving the projects section to hide it from the footer.
+    if (glitchActive || activeIndex > 5 || activeIndex === 0) {
       setActiveModel(activeIndex);
     }
   }, [glitchActive, activeIndex]);
@@ -258,7 +259,7 @@ export default function SceneObjects() {
       rootGroupRef.current.scale.z = THREE.MathUtils.lerp(rootGroupRef.current.scale.z, targetScale, scaleLerp);
 
       // Only show the scene objects when user has reached the projects section (activeIndex > 0)
-      rootGroupRef.current.visible = activeIndex > 0;
+      rootGroupRef.current.visible = activeIndex > 0 && activeIndex <= 5;
     }
   });
 
