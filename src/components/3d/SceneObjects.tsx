@@ -226,16 +226,16 @@ export default function SceneObjects() {
 
       let targetX = 0;
       let targetRotY = 0;
-      let targetScale = isMobile ? 0.8 : 1.4; // Larger for PC, smaller for mobile
+      let targetScale = isMobile ? 0.8 : 1.2; // Reduced to 1.2 for PC to fit screen
 
       if (!isMobile && activeIndex > 0 && activeIndex <= 5) {
         // activeIndex - 1 gives us the project index (0-based)
         // Use that to determine left/right positioning
         if ((activeIndex - 1) % 2 === 0) {
-          targetX = 3.8;   // Text on left, push model right (adjusted for larger scale)
+          targetX = 3.5;   // Text on left, push model right
           targetRotY = -0.15;
         } else {
-          targetX = -3.8;  // Text on right, push model left (adjusted for larger scale)
+          targetX = -3.5;  // Text on right, push model left
           targetRotY = 0.15;
         }
       }
@@ -267,7 +267,7 @@ export default function SceneObjects() {
   React.useEffect(() => {
     if (glitchTrigger > 0 && rootGroupRef.current) {
       const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5      
-        ? ((activeIndex - 1) % 2 === 0 ? 3.8 : -3.8)
+        ? ((activeIndex - 1) % 2 === 0 ? 3.5 : -3.5)
         : 0;
 
       rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
