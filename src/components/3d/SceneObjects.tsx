@@ -2,20 +2,27 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Environment, Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import { useExperience } from '../../hooks/useExperience';
 
-function SpineVisualizer({ active }: { active: boolean }) {
+function getScaleFactor(index: number, progress: number) {
+  const dist = Math.abs(index - progress);
+  return Math.max(0.001, 1 - dist);
+}
+
+function SpineVisualizer({ index }: { index: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const targetProgress = useExperience((s) => s.targetProgress);
 
   useFrame((state) => {
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
-      const targetScale = active ? 1 : 0.001; 
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-      if (active) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
+      if (scaleFactor > 0.1) groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
     }
-    
-    if (meshRef.current && active) {
+
+    if (meshRef.current && scaleFactor > 0.01) {
       for (let i = 0; i < 8; i++) {
         dummy.position.set(0, (i - 3.5) * 0.4, 0);
         dummy.updateMatrix();
@@ -35,14 +42,17 @@ function SpineVisualizer({ active }: { active: boolean }) {
   );
 }
 
-function MedicalTablet({ active }: { active: boolean }) {
+function MedicalTablet({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  const targetProgress = useExperience((s) => s.targetProgress);
+
   useFrame(() => {
     if (groupRef.current) {
-      const targetScale = active ? 1 : 0.001;
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      const scaleFactor = getScaleFactor(index, targetProgress);
+      groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
   });
+
   return (
     <group ref={groupRef}>
       <Float speed={4} rotationIntensity={0.5} floatIntensity={2}>
@@ -59,15 +69,17 @@ function MedicalTablet({ active }: { active: boolean }) {
   );
 }
 
-function PulsingNodes({ active }: { active: boolean }) {
+function PulsingNodes({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  const targetProgress = useExperience((s) => s.targetProgress);
+
   useFrame(({ clock }) => {
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
-      const targetScale = active ? 1 : 0.001;
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-      if (active) {
+      groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
+      if (scaleFactor > 0.01) {
         const pulse = 1 + Math.sin(clock.elapsedTime * 3) * 0.1;
-        groupRef.current.children.forEach(c => c.scale.setScalar(pulse));
+        groupRef.current.children.forEach((c) => c.scale.setScalar(pulse));
       }
     }
   });
@@ -84,13 +96,15 @@ function PulsingNodes({ active }: { active: boolean }) {
   );
 }
 
-function IsometricBlocks({ active }: { active: boolean }) {
+function IsometricBlocks({ index }: { index: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  const targetProgress = useExperience((s) => s.targetProgress);
+
   useFrame(({ clock }) => {
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
-      const targetScale = active ? 1 : 0.001;
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-      if (active) {
+      groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
+      if (scaleFactor > 0.01) {
         groupRef.current.rotation.y = clock.elapsedTime * 0.5;
         groupRef.current.rotation.x = 0.5;
       }
@@ -109,24 +123,25 @@ function IsometricBlocks({ active }: { active: boolean }) {
   );
 }
 
-function ReactiveWaveform({ active }: { active: boolean }) {
+function ReactiveWaveform({ index }: { index: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const targetProgress = useExperience((s) => s.targetProgress);
 
   useFrame(({ clock }) => {
+    const scaleFactor = getScaleFactor(index, targetProgress);
     if (groupRef.current) {
-      const targetScale = active ? 1 : 0.001;
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      groupRef.current.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
-    
-    if (meshRef.current && active) {
+
+    if (meshRef.current && scaleFactor > 0.01) {
       const time = clock.elapsedTime;
       for (let i = 0; i < 16; i++) {
         const bassTransient = Math.pow(Math.sin(time * 3 + i * 0.5), 4) * 1.8;
         const lowPassMuffle = Math.sin(time * 0.8 + i) * 0.3;
         const scaleY = 1 + bassTransient + lowPassMuffle;
-        
+
         dummy.position.set((i - 7.5) * 0.3, 0, 0);
         dummy.scale.set(1, scaleY, 1);
         dummy.updateMatrix();
@@ -146,27 +161,35 @@ function ReactiveWaveform({ active }: { active: boolean }) {
   );
 }
 
-function Rig() {
-  useFrame((state) => {
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, (state.mouse.x * Math.PI) / 10, 0.05);
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, (state.mouse.y * Math.PI) / 10, 0.05);
-    state.camera.lookAt(0, 0, 0);
-  });
-  return null;
-}
+export default function SceneObjects() {
+  const { glitchTrigger } = useExperience();
+  const rootGroupRef = useRef<THREE.Group>(null);
 
-export default function SceneObjects({ activeIndex }: { activeIndex: number }) {
+  useFrame(() => {
+    if (rootGroupRef.current) {
+      rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(rootGroupRef.current.rotation.z, 0, 0.05);
+      rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, 0, 0.1);
+    }
+  });
+
+  React.useEffect(() => {
+    if (glitchTrigger > 0 && rootGroupRef.current) {
+      rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
+      rootGroupRef.current.position.x = (Math.random() - 0.5) * 0.5;
+    }
+  }, [glitchTrigger]);
+
   return (
-    <group position-x={typeof window !== 'undefined' && window.innerWidth > 768 ? 2 : 0} position-y={typeof window !== 'undefined' && window.innerWidth < 768 ? -1.5 : 0}>
-      <SpineVisualizer active={activeIndex === 0} />
-      <MedicalTablet active={activeIndex === 1} />
-      <PulsingNodes active={activeIndex === 2} />
-      <IsometricBlocks active={activeIndex === 3} />
-      <ReactiveWaveform active={activeIndex === 4} />
-      <Rig />
+    <group ref={rootGroupRef}>
       <Environment preset="city" />
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[10, 10, 5]} intensity={1} color="#06b6d4" />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1.5} />
+
+      <SpineVisualizer index={0} />
+      <MedicalTablet index={1} />
+      <PulsingNodes index={2} />
+      <IsometricBlocks index={3} />
+      <ReactiveWaveform index={4} />
     </group>
   );
 }
