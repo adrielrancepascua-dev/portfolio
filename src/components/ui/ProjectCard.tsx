@@ -91,7 +91,8 @@ export function ProjectCard({ project, index, total }: { project: Project; index
   };
   
   const onCardEnter = () => {
-    triggerGlitch();
+    // trigger a short, timed glitch (200ms)
+    triggerGlitch(200);
   };
 
   return (
@@ -106,11 +107,11 @@ export function ProjectCard({ project, index, total }: { project: Project; index
         [ SYSTEM {index + 1} / {total} ]
       </p>
       <ScrambledText text={project.title} />
-      <h3 className="text-lg md:text-xl font-medium text-slate-300 mb-6 font-sans hover:text-cyan-400 transition-colors">
+      <h3 className="text-lg md:text-xl font-medium text-slate-300 mb-4 font-sans hover:text-cyan-400 transition-colors">
         {project.subtitle}
       </h3>
-      <p className="text-slate-400 leading-relaxed font-mono text-sm">
-        {project.description}
+      <p className="text-slate-300 leading-relaxed font-mono text-sm mb-4">
+        {project.impact}
       </p>
 
       <div className="mt-6 space-y-4">

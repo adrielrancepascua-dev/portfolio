@@ -162,13 +162,21 @@ function ReactiveWaveform({ index }: { index: number }) {
 }
 
 export default function SceneObjects() {
-  const { glitchTrigger } = useExperience();
+  const glitchTrigger = useExperience((s) => s.glitchTrigger);
+  const glitchActive = useExperience((s) => s.glitchActive);
+  const activeIndex = useExperience((s) => s.activeIndex);
   const rootGroupRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
     if (rootGroupRef.current) {
-      rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(rootGroupRef.current.rotation.z, 0, 0.05);
-      rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, 0, 0.1);
+      const rotLerp = glitchActive ? 0.4 : 0.05;
+      const posLerp = glitchActive ? 0.6 : 0.1;
+
+      rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(rootGroupRef.current.rotation.z, 0, rotLerp);
+      rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, 0, posLerp);
+
+      // Only show the scene objects when user has reached the projects section (activeIndex > 0)
+      rootGroupRef.current.visible = activeIndex > 0;
     }
   });
 

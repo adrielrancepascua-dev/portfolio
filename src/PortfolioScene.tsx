@@ -62,7 +62,10 @@ function ScrollEffects({ scrollVelocityRef }: { scrollVelocityRef: React.RefObje
     []
   );
 
+  const lowPower = useExperience((s) => s.lowPowerMode);
+
   useFrame(() => {
+    if (lowPower) return;
     let velocity = scrollVelocityRef.current ?? 0;
     velocity = gsap.utils.clamp(0, 0.05, velocity);
 
@@ -70,6 +73,8 @@ function ScrollEffects({ scrollVelocityRef }: { scrollVelocityRef: React.RefObje
     chromaticEffect.offset.x = THREE.MathUtils.lerp(chromaticEffect.offset.x, velocity * 0.5, 0.1);
     chromaticEffect.offset.y = THREE.MathUtils.lerp(chromaticEffect.offset.y, velocity * 0.5, 0.1);
   });
+
+  if (lowPower) return null;
 
   return (
     <EffectComposer enableNormalPass={false} multisampling={4}>
@@ -85,10 +90,13 @@ export default function PortfolioScene() {
   const panelsRef = useRef<(HTMLDivElement | null)[]>([]);
   const scrollVelocityRef = useRef(0);
 
-  const { setActiveIndex, setTargetProgress, triggerGlitch } = useExperience();
+  const { setActiveIndex, setTargetProgress, triggerGlitch, startPerformanceMonitor } = useExperience();
 
   useLayoutEffect(() => {
     const totalProjects = PROJECTS.length;
+
+    // Start FPS monitoring so the site can disable heavy postprocessing on low-end devices
+    startPerformanceMonitor();
 
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
@@ -179,7 +187,7 @@ export default function PortfolioScene() {
               <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-cyan-500"></span>
               <span className="relative z-10 flex items-center gap-2 pointer-events-none">
                 <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
-                HIRE_THE_GHOST()
+                INITIATE_PARTNERSHIP()
               </span>
             </button>
           </MagneticButton>

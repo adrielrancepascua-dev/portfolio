@@ -12,7 +12,7 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
           <Activity className="w-6 h-6 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[10px] text-red-500 tracking-[0.2em] mb-1">ENCRYPTED_MEDICAL_FILE // SECURE_ACCESS_GRANTED</span>
-            [SUBJECT_DIAGNOSTIC]: THE OPTIMIZED ANOMALY
+            <span className="text-base md:text-lg text-white font-medium">Engineering High-Performance Systems for Healthcare &amp; Beyond.</span>
           </div>
         </h2>
 
@@ -26,8 +26,11 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
             Clinical precision meets raw code. I spend my mornings in the ward and my nights in the IDE. Operating out of Aguilar, I balance managing a local family shop with architecting high-end React and Next.js systems for US markets. I don’t just build apps; I stabilize them.
           </p>
           <p>
-            <strong className="text-emerald-400 flex items-center gap-2 mb-1"><Terminal className="w-4 h-4"/> THE GHOST PROTOCOL</strong>
-            I am driven by Aggressive Growth. I view inconvenience as merely a bug waiting to be patched, whether it's optimizing Roblox UBG or debugging a complex Supabase backend. I am the Ghost in the machine, executing world-class projects from the Philippines to solve global problems.
+            <strong className="text-emerald-400 flex items-center gap-2 mb-1"><Terminal className="w-4 h-4"/> CLINICAL SYSTEMS ARCHITECT</strong>
+            I am a Clinical Systems Architect: a bridge between ward workflows and robust production systems. I combine clinical domain expertise with systems engineering to build reliable, safety-minded software that performs under pressure.
+          </p>
+          <p>
+            <em className="text-slate-400">3rd Year Nursing Student at Universidad de Dagupan. Building the future of clinical workflows through code.</em>
           </p>
         </div>
 
@@ -61,6 +64,14 @@ export const SystemDiagnostic = forwardRef<HTMLDivElement, {}>((props, ref) => {
                 <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 w-[93%] shadow-[0_0_10px_rgba(6,182,212,0.8)] relative flex">
                   <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
                 </div>
+              </div>
+              <div className="mt-4 bg-slate-900/40 p-3 rounded border border-slate-800">
+                <div className="text-slate-400 text-xs font-bold mb-2">CERTIFICATIONS &amp; VALIDATION</div>
+                <ul className="text-slate-300 text-sm space-y-1">
+                  <li><strong>Presidential Scholarship</strong> — recognized academic merit within the University of the Philippines system.</li>
+                  <li><strong>2.6 UPG</strong> — demonstrated ability to maintain elite academic performance while balancing demanding clinical rotations.</li>
+                </ul>
+                <div className="text-slate-400 text-xs mt-2">Proven ability to maintain elite academic performance while managing complex technical deployments.</div>
               </div>
             </div>
           </div>
