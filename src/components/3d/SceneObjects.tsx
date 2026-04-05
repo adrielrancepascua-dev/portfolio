@@ -222,18 +222,20 @@ export default function SceneObjects() {
     if (rootGroupRef.current) {
       const rotLerp = glitchActive ? 0.4 : 0.05;
       const posLerp = glitchActive ? 0.6 : 0.05;
+      const scaleLerp = 0.08;
 
       let targetX = 0;
       let targetRotY = 0;
+      let targetScale = isMobile ? 0.8 : 1.4; // Larger for PC, smaller for mobile
 
       if (!isMobile && activeIndex > 0 && activeIndex <= 5) {
         // activeIndex - 1 gives us the project index (0-based)
         // Use that to determine left/right positioning
         if ((activeIndex - 1) % 2 === 0) {
-          targetX = 2.5;   // Text on left, push model right
+          targetX = 3.8;   // Text on left, push model right (adjusted for larger scale)
           targetRotY = -0.15;
         } else {
-          targetX = -2.5;  // Text on right, push model left
+          targetX = -3.8;  // Text on right, push model left (adjusted for larger scale)
           targetRotY = 0.15;
         }
       }
@@ -241,12 +243,21 @@ export default function SceneObjects() {
       // Ensure mouse parallax effect is added on top of the base positions/rotations
       const parallaxX = state.pointer.x * 0.1;
       const parallaxY = state.pointer.y * 0.1;
+      
+      // Add subtle float animation on Y-axis for suspended/zero-G effect
+      const floatY = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
 
       rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(rootGroupRef.current.rotation.z, 0, rotLerp);
       rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, targetX + parallaxX, posLerp);
+      rootGroupRef.current.position.y = THREE.MathUtils.lerp(rootGroupRef.current.position.y, floatY, posLerp);
       
       // Lerp Y rotation smoothly
       rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, targetRotY + parallaxY, 0.05);
+      
+      // Lerp scale smoothly for PC/mobile transitions
+      rootGroupRef.current.scale.x = THREE.MathUtils.lerp(rootGroupRef.current.scale.x, targetScale, scaleLerp);
+      rootGroupRef.current.scale.y = THREE.MathUtils.lerp(rootGroupRef.current.scale.y, targetScale, scaleLerp);
+      rootGroupRef.current.scale.z = THREE.MathUtils.lerp(rootGroupRef.current.scale.z, targetScale, scaleLerp);
 
       // Only show the scene objects when user has reached the projects section (activeIndex > 0)
       rootGroupRef.current.visible = activeIndex > 0;
@@ -256,7 +267,7 @@ export default function SceneObjects() {
   React.useEffect(() => {
     if (glitchTrigger > 0 && rootGroupRef.current) {
       const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5      
-        ? ((activeIndex - 1) % 2 === 0 ? 2.5 : -2.5)
+        ? ((activeIndex - 1) % 2 === 0 ? 3.8 : -3.8)
         : 0;
 
       rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
