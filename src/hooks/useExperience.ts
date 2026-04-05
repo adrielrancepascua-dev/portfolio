@@ -14,6 +14,10 @@ interface ExperienceState {
   startPerformanceMonitor: () => void;
   stopPerformanceMonitor: () => void;
   setLowPowerMode: (v: boolean) => void;
+  isMobile: boolean;
+  setIsMobile: (v: boolean) => void;
+  isReady: boolean;
+  setIsReady: (v: boolean) => void;
 }
 
 export const useExperience = create<ExperienceState>((set) => {
@@ -55,6 +59,8 @@ export const useExperience = create<ExperienceState>((set) => {
     glitchActive: false,
     fps: 60,
     lowPowerMode: false,
+    isMobile: false,
+    isReady: false,
 
     setActiveIndex: (index) => set({ activeIndex: index }),
     setTargetProgress: (progress) => set({ targetProgress: progress }),
@@ -65,5 +71,7 @@ export const useExperience = create<ExperienceState>((set) => {
     startPerformanceMonitor,
     stopPerformanceMonitor,
     setLowPowerMode: (v: boolean) => set({ lowPowerMode: v }),
+    setIsMobile: (v: boolean) => set({ isMobile: v }),
+    setIsReady: (v: boolean) => set({ isReady: v }),
   };
 });

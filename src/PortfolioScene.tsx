@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from "react";
+import React, { useRef, useLayoutEffect, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -90,7 +90,21 @@ export default function PortfolioScene() {
   const panelsRef = useRef<(HTMLDivElement | null)[]>([]);
   const scrollVelocityRef = useRef(0);
 
-  const { setActiveIndex, setTargetProgress, triggerGlitch, startPerformanceMonitor } = useExperience();
+  const { setActiveIndex, setTargetProgress, triggerGlitch, startPerformanceMonitor, setIsMobile, setIsReady, isReady, isMobile } = useExperience();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        useExperience.getState().setLowPowerMode(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [setIsMobile]);
 
   useLayoutEffect(() => {
     const totalProjects = PROJECTS.length;
@@ -161,8 +175,8 @@ export default function PortfolioScene() {
 
       <HUD />
 
-      <div className="fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto">
-        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+      <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none md:pointer-events-auto transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }} onCreated={() => setIsReady(true)}>
           <SceneObjects />
           <ScrollEffects scrollVelocityRef={scrollVelocityRef} />
         </Canvas>
