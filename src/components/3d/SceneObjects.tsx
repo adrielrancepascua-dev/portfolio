@@ -215,15 +215,36 @@ export default function SceneObjects() {
   const glitchTrigger = useExperience((s) => s.glitchTrigger);
   const glitchActive = useExperience((s) => s.glitchActive);
   const activeIndex = useExperience((s) => s.activeIndex);
+  const isMobile = useExperience((s) => s.isMobile);
   const rootGroupRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (rootGroupRef.current) {
       const rotLerp = glitchActive ? 0.4 : 0.05;
-      const posLerp = glitchActive ? 0.6 : 0.1;
+      const posLerp = glitchActive ? 0.6 : 0.05;
+
+      let targetX = 0;
+      let targetRotY = 0;
+
+      if (!isMobile && activeIndex > 0 && activeIndex <= 5) {
+        if (activeIndex % 2 === 0) {
+          targetX = 2.2;
+          targetRotY = -0.15; // Rotate slightly negative (left) toward text
+        } else {
+          targetX = -2.2;
+          targetRotY = 0.15;  // Rotate slightly positive (right) toward text
+        }
+      }
+
+      // Ensure mouse parallax effect is added on top of the base positions/rotations
+      const parallaxX = state.pointer.x * 0.1;
+      const parallaxY = state.pointer.y * 0.1;
 
       rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(rootGroupRef.current.rotation.z, 0, rotLerp);
-      rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, 0, posLerp);
+      rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, targetX + parallaxX, posLerp);
+      
+      // Lerp Y rotation smoothly
+      rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, targetRotY + parallaxY, 0.05);
 
       // Only show the scene objects when user has reached the projects section (activeIndex > 0)
       rootGroupRef.current.visible = activeIndex > 0;
@@ -232,14 +253,17 @@ export default function SceneObjects() {
 
   React.useEffect(() => {
     if (glitchTrigger > 0 && rootGroupRef.current) {
+      const baseTargetX = !isMobile && activeIndex > 0 && activeIndex <= 5 
+        ? (activeIndex % 2 === 0 ? 2.2 : -2.2) 
+        : 0;
+
       rootGroupRef.current.rotation.z = (Math.random() - 0.5) * 0.2;
-      rootGroupRef.current.position.x = (Math.random() - 0.5) * 0.5;
+      rootGroupRef.current.position.x = baseTargetX + (Math.random() - 0.5) * 0.5;
     }
-  }, [glitchTrigger]);
+  }, [glitchTrigger, activeIndex, isMobile]);
 
   return (
     <group ref={rootGroupRef}>
-      <Environment preset="city" />
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1.5} />
 
