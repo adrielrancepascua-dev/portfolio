@@ -23,6 +23,6 @@
   },
   "scripts": {
     "dev": "vite --open",
-    "build": "vite build"
+    "build": "node ./node_modules/vite/bin/vite.js build"
   }
 }
