@@ -36,6 +36,19 @@ function LoadingManager() {
 
 function MagneticButton({ children }: { children: React.ReactElement }) {
   const ref = useRef<HTMLDivElement>(null);
+  const quickXRef = useRef<((value: number) => void) | null>(null);
+  const quickYRef = useRef<((value: number) => void) | null>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    quickXRef.current = gsap.quickTo(ref.current, 'x', { duration: 0.25, ease: 'power3.out' });
+    quickYRef.current = gsap.quickTo(ref.current, 'y', { duration: 0.25, ease: 'power3.out' });
+    return () => {
+      quickXRef.current = null;
+      quickYRef.current = null;
+      if (ref.current) gsap.set(ref.current, { x: 0, y: 0 });
+    };
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
@@ -43,22 +56,14 @@ function MagneticButton({ children }: { children: React.ReactElement }) {
     const x = (e.clientX - left - width / 2) * 0.3;
     const y = (e.clientY - top - height / 2) * 0.3;
 
-    gsap.to(ref.current, {
-      x,
-      y,
-      duration: 0.8,
-      ease: "power3.out",
-    });
+    quickXRef.current?.(x);
+    quickYRef.current?.(y);
   };
 
   const handleMouseLeave = () => {
     if (!ref.current) return;
-    gsap.to(ref.current, {
-      x: 0,
-      y: 0,
-      duration: 1.2,
-      ease: "elastic.out(1, 0.3)",
-    });
+    quickXRef.current?.(0);
+    quickYRef.current?.(0);
   };
 
   return (
@@ -95,7 +100,7 @@ function ScrollEffects({ scrollVelocityRef }: { scrollVelocityRef: React.RefObje
   if (lowPower) return null;
 
   return (
-    <EffectComposer enableNormalPass={false} multisampling={4}>
+    <EffectComposer enableNormalPass={false} multisampling={0}>
       <Bloom luminanceThreshold={0.5} luminanceSmoothing={1} intensity={1.5} />
       <primitive object={chromaticEffect} />
       <Vignette eskil={false} offset={0.1} darkness={1.1} />
@@ -200,7 +205,7 @@ export default function PortfolioScene() {
       <div className={`fixed inset-0 z-0 h-screen w-full pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'} ${isMobile && glitchActive ? 'opacity-30 blur-sm mix-blend-difference' : ''}`}>
         <Canvas 
           camera={{ position: [0, 0, 5], fov: 45 }} 
-          dpr={isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio}
+          dpr={[1, 1.5]}
           frameloop={isMobile && !glitchActive ? "demand" : "always"}
         >
           <LoadingManager />

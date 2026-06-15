@@ -6,27 +6,35 @@ import { useExperience } from '../../hooks/useExperience';
 // Optional: extract magnetic effect hook
 function useMagneticEffect() {
   const ref = useRef<HTMLDivElement>(null);
+  const quickXRef = useRef<((value: number) => void) | null>(null);
+  const quickYRef = useRef<((value: number) => void) | null>(null);
+
+  React.useEffect(() => {
+    if (!ref.current) return;
+    quickXRef.current = gsap.quickTo(ref.current, 'x', { duration: 0.25, ease: 'power3.out' });
+    quickYRef.current = gsap.quickTo(ref.current, 'y', { duration: 0.25, ease: 'power3.out' });
+
+    return () => {
+      quickXRef.current = null;
+      quickYRef.current = null;
+      if (ref.current) gsap.set(ref.current, { x: 0, y: 0 });
+    };
+  }, []);
   
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
     const x = (e.clientX - left - width / 2) * 0.1;
     const y = (e.clientY - top - height / 2) * 0.1;
-    
-    gsap.to(ref.current, {
-      x, y,
-      duration: 0.8,
-      ease: "power3.out"
-    });
+
+    quickXRef.current?.(x);
+    quickYRef.current?.(y);
   };
 
   const handleMouseLeave = () => {
     if (!ref.current) return;
-    gsap.to(ref.current, {
-      x: 0, y: 0,
-      duration: 1.2,
-      ease: "elastic.out(1, 0.3)"
-    });
+    quickXRef.current?.(0);
+    quickYRef.current?.(0);
   };
 
   return { ref, handleMouseMove, handleMouseLeave };
